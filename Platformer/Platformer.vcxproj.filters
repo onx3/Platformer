@@ -1,0 +1,196 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Managers">
+      <UniqueIdentifier>{98354638-e5ae-4c2d-b546-9798c18df468}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Components">
+      <UniqueIdentifier>{c1cc41e1-0b61-4759-a3f8-0be7ce7f765e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ExtLibs">
+      <UniqueIdentifier>{6e838687-59fa-4823-9471-c2c336cf8f58}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ExtLibs\ImGui">
+      <UniqueIdentifier>{088dc731-a488-4a55-9dfb-d32595648584}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DebugTileEditor">
+      <UniqueIdentifier>{67f3e0dd-d32f-48d1-b161-c7843c6aaa59}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="AstroidsPrivate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GameManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Timer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseManager.cpp">
+      <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerManager.cpp">
+      <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="EnemyAIManager.cpp">
+      <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceManager.cpp">
+      <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="ScoreManager.cpp">
+      <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowManager.cpp">
+      <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="CollisionListener.cpp">
+      <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="DropManager.cpp">
+      <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="CollisionComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="ControlledMovementComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="DropMovementComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="ExplosionComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="GameComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="HealthComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="ProjectileComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="RandomMovementComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="SpriteComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ExtLibs\ImGui-sfml\imgui-SFML.cpp">
+      <Filter>ExtLibs\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ExtLibs\ImGui\imgui_widgets.cpp">
+      <Filter>ExtLibs\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ExtLibs\ImGui\imgui.cpp">
+      <Filter>ExtLibs\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ExtLibs\ImGui\imgui_demo.cpp">
+      <Filter>ExtLibs\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ExtLibs\ImGui\imgui_draw.cpp">
+      <Filter>ExtLibs\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ExtLibs\ImGui\imgui_tables.cpp">
+      <Filter>ExtLibs\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="TileEditor.cpp">
+      <Filter>DebugTileEditor</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AstroidsPrivate.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BDConfig.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameManager.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Timer.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseManager.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerManager.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="EnemyAIManager.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceManager.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="ScoreManager.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowManager.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="CollisionListener.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="DropManager.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="CollisionComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="ControlledMovementComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="DropMovementComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="ExplosionComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="GameComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="HealthComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="ProjectileComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="RandomMovementComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="SpriteComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ExtLibs\ImGui-sfml\imgui-SFML.h">
+      <Filter>ExtLibs\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ExtLibs\ImGui\imconfig.h">
+      <Filter>ExtLibs\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ExtLibs\ImGui\imgui.h">
+      <Filter>ExtLibs\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ExtLibs\ImGui\imgui_internal.h">
+      <Filter>ExtLibs\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="TileEditor.h">
+      <Filter>DebugTileEditor</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
