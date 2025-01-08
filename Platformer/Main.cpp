@@ -19,6 +19,7 @@ int main()
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
             {
                 paused = !paused;
+                pGameManager->SetPausedState(paused);
             }
 
             float deltaTime = clock.restart().asSeconds();
@@ -28,6 +29,7 @@ int main()
             }
             else
             {
+                pGameManager->DebugUpdate();
                 clock.restart();
             }
             pGameManager->Render(deltaTime);

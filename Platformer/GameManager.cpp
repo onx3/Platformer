@@ -27,6 +27,7 @@ GameManager::GameManager(WindowManager & windowManager)
     , mPhysicsWorld(b2Vec2(0.0f, 0.f))
     , mCollisionListener(this)
     , mpTileEditor(nullptr)
+    , mPaused(false)
 {
     // Keep this first
     {
@@ -174,6 +175,30 @@ void GameManager::Update(float deltaTime)
             manager.second->Update(deltaTime);
         }
     }
+}
+
+//------------------------------------------------------------------------------------------------------------------------
+
+void GameManager::DebugUpdate()
+{
+    if (!mpWindow)
+    {
+        return;
+    }
+
+    sf::Vector2i mousePos = sf::Mouse::getPosition(*mpWindow);
+
+    float cellWidth = 32.f;
+    float cellHeight = 32.f;
+
+    int cellX = int(mousePos.x / cellWidth);
+    int cellY = int(mousePos.y / cellHeight);
+
+    if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+    {
+        printf("Clicked on cell %d, %d", cellX, cellY);
+    }
+
 }
 
 //------------------------------------------------------------------------------------------------------------------------
@@ -337,26 +362,67 @@ void GameManager::Render(float deltaTime)
             }
         }
 
-        sf::Vector2i mousePosition = sf::Mouse::getPosition(*mpWindow);
-        mCursorSprite.setPosition(float(mousePosition.x), float(mousePosition.y));
-        mpWindow->draw(mCursorSprite);
+        if (!mPaused)
+        {
+            sf::Vector2i mousePosition = sf::Mouse::getPosition(*mpWindow);
+            mCursorSprite.setPosition(float(mousePosition.x), float(mousePosition.y));
+            mpWindow->draw(mCursorSprite);
+        }
     }
 
-    // Start ImGui frame
-    int imGuiTime = std::max(deltaTime, 0.0001f);
-    ImGui::SFML::Update(*mpWindow, sf::milliseconds(1));
-
-    // Render ImGui windows
-    if (mpTileEditor)
+    // ImGui
     {
-        mpTileEditor->RenderEditor();
-    }
-    RenderImGui(); // Render additional ImGui windows if needed
+        int imGuiTime = int(std::max(deltaTime, 0.0001f));
+        ImGui::SFML::Update(*mpWindow, sf::milliseconds(1));
 
-    // Render ImGui draw data
-    ImGui::SFML::Render(*mpWindow);
+        // Acts as a debug mode
+        if (mPaused)
+        {
+            mpWindow->setMouseCursorVisible(true);
+            RenderDebugMode();
+        }
+        
+        RenderImGui();
+
+        // Render ImGui draw data
+        ImGui::SFML::Render(*mpWindow);
+    }
 
     mpWindow->display();
+}
+
+//------------------------------------------------------------------------------------------------------------------------
+
+void GameManager::RenderDebugMode()
+{
+    DrawGrid(32.f, 32.f);
+    if (mpTileEditor)
+    {
+        //mpTileEditor->RenderEditor();
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------
+
+void GameManager::DrawGrid(float cellWidth, float cellHeight)
+{
+    sf::VertexArray grid(sf::Lines);
+
+    sf::Vector2u windowSize = mpWindow->getSize();
+
+    for (float xx = 0; xx <= windowSize.x; xx += cellWidth)
+    {
+        grid.append(sf::Vertex(sf::Vector2f(xx, 0), sf::Color::White));
+        grid.append(sf::Vertex(sf::Vector2f(xx, float(windowSize.y)), sf::Color::White));
+    }
+
+    for (float yy = 0; yy <= windowSize.y; yy += cellHeight)
+    {
+        grid.append(sf::Vertex(sf::Vector2f(0, yy), sf::Color::White));
+        grid.append(sf::Vertex(sf::Vector2f(float(windowSize.x), yy), sf::Color::White));
+    }
+
+    mpWindow->draw(grid);
 }
 
 //------------------------------------------------------------------------------------------------------------------------
@@ -398,6 +464,13 @@ bool GameManager::IsGameOver() const
 b2World & GameManager::GetPhysicsWorld()
 {
     return mPhysicsWorld;
+}
+
+//------------------------------------------------------------------------------------------------------------------------
+
+void GameManager::SetPausedState(bool pause)
+{
+    mPaused = pause;
 }
 
 //------------------------------------------------------------------------------------------------------------------------

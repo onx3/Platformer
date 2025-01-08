@@ -70,17 +70,16 @@ void TileEditor::RenderEditor()
 				ImGui::SameLine();
 			}
 		}
-
-		ImGui::Separator();
-		if (ImGui::Button("Save"))
-		{
-			SaveTilemap("TileMap.json");
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("Load"))
-		{
-			LoadTilemap("TileMap.json");
-		}
+	}
+	ImGui::Separator();
+	if (ImGui::Button("Save"))
+	{
+		SaveTilemap("TileMap.json");
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("Load"))
+	{
+		LoadTilemap("TileMap.json");
 	}
 	ImGui::End();
 }

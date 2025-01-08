@@ -1,5 +1,4 @@
 #pragma once
-
 #include "AstroidsPrivate.h"
 
 class WindowManager

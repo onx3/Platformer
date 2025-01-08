@@ -7,7 +7,7 @@
 WindowManager::WindowManager()
 	: mEvent()
 {
-    mpWindow = new sf::RenderWindow(sf::VideoMode(1800, 1200), "Astroids", sf::Style::Default);
+    mpWindow = new sf::RenderWindow(sf::VideoMode(1920, 1088), "Astroids", sf::Style::Default);
     mpWindow->setFramerateLimit(240);
 
     mpWindow->setMouseCursorVisible(false);

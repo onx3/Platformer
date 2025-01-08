@@ -30,9 +30,14 @@ public:
 	void EndGame();
 
 	void Update(float deltaTime);
+
+	void DebugUpdate();
+
 	void UpdateGameObjects(float deltaTime);
 
 	void Render(float deltaTime);
+
+	void RenderDebugMode();
 
 	template <typename T>
 	void AddManager();
@@ -56,6 +61,8 @@ public:
 
 	b2World & GetPhysicsWorld();
 
+	void SetPausedState(bool pause);
+
 	// Window
 	WindowManager & mWindowManager;
 	sf::RenderWindow * mpWindow;
@@ -77,6 +84,8 @@ private:
 	void InitializeParallaxLayers();  // Helper to initialize layers
 	void UpdateParallaxLayers(float deltaTime, float playerSpeedX);
 	void RenderParallaxLayers();
+
+	void DrawGrid(float cellWidth, float cellHeight);
 
 	bool mShowImGuiWindow;
 	std::unordered_map<std::type_index, BaseManager *> mManagers;
@@ -102,4 +111,5 @@ private:
 
 	// TileEditor
 	TileEditor * mpTileEditor;
+	bool mPaused;
 };
