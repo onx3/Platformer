@@ -41,6 +41,8 @@ public:
 
 	template <typename T>
 	void AddManager();
+	template <typename T, typename... Args>
+	void AddManager(Args&&... args);
 
 	template <typename T>
 	T * GetManager()
@@ -81,10 +83,6 @@ private:
 
 	std::vector<std::string> GetCommonResourcePaths();
 
-	void InitializeParallaxLayers();  // Helper to initialize layers
-	void UpdateParallaxLayers(float deltaTime, float playerSpeedX);
-	void RenderParallaxLayers();
-
 	void DrawGrid(float cellWidth, float cellHeight);
 
 	bool mShowImGuiWindow;
@@ -110,6 +108,5 @@ private:
 	std::vector<ParallaxLayer> mParallaxLayers;
 
 	// TileEditor
-	TileEditor * mpTileEditor;
 	bool mPaused;
 };

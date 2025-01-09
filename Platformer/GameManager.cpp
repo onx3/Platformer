@@ -26,7 +26,6 @@ GameManager::GameManager(WindowManager & windowManager)
     , mIsGameOver(false)
     , mPhysicsWorld(b2Vec2(0.0f, 0.f))
     , mCollisionListener(this)
-    , mpTileEditor(nullptr)
     , mPaused(false)
 {
     // Keep this first
@@ -42,9 +41,7 @@ GameManager::GameManager(WindowManager & windowManager)
     AddManager<EnemyAIManager>();
     AddManager<ScoreManager>();
     AddManager<DropManager>();
-
-    InitializeParallaxLayers();
-
+    AddManager<TileEditor>(20, 15, 32);
 
     // Game Audio
     /*{
@@ -86,8 +83,8 @@ GameManager::GameManager(WindowManager & windowManager)
 
     // TileEditorManager
     {
-        mpTileEditor = new TileEditor(20, 15, 32);
-        mpTileEditor->Initalize();
+        auto * pTileEditor = GetManager<TileEditor>();
+        pTileEditor->Initalize();
     }
 }
 
@@ -105,12 +102,6 @@ GameManager::~GameManager()
         }
     }
     mManagers.clear();
-
-    if (mpTileEditor)
-    {
-        delete mpTileEditor;
-        mpTileEditor = nullptr;
-    }
 
     ImGui::SFML::Shutdown();
     if (ImGui::GetCurrentContext() != nullptr)
@@ -165,7 +156,6 @@ void GameManager::Update(float deltaTime)
         mPhysicsWorld.Step(timeStep, velocityIterations, positionIterations);
     }
 
-    UpdateParallaxLayers(deltaTime, 100.f);
     UpdateGameObjects(deltaTime);
 
     for (auto & manager : mManagers)
@@ -196,9 +186,9 @@ void GameManager::DebugUpdate()
 
     if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
     {
-        printf("Clicked on cell %d, %d", cellX, cellY);
+        //mpTileEditor->SetTile()
+        printf("Clicked on cell %d, %d \n", cellX, cellY);
     }
-
 }
 
 //------------------------------------------------------------------------------------------------------------------------
@@ -336,8 +326,6 @@ void GameManager::Render(float deltaTime)
 {
     mpWindow->clear();
 
-    RenderParallaxLayers();
-
     if (mIsGameOver)
     {
         mpWindow->draw(mGameOverText);
@@ -370,7 +358,7 @@ void GameManager::Render(float deltaTime)
         }
     }
 
-    // ImGui
+    // ImGui && Debug mode
     {
         int imGuiTime = int(std::max(deltaTime, 0.0001f));
         ImGui::SFML::Update(*mpWindow, sf::milliseconds(1));
@@ -396,9 +384,10 @@ void GameManager::Render(float deltaTime)
 void GameManager::RenderDebugMode()
 {
     DrawGrid(32.f, 32.f);
-    if (mpTileEditor)
+    auto * pTileEditor = GetManager<TileEditor>();
+    if (pTileEditor)
     {
-        //mpTileEditor->RenderEditor();
+        pTileEditor->RenderEditor();
     }
 }
 
@@ -434,6 +423,19 @@ void GameManager::AddManager()
     if (mManagers.find(typeid(T)) == mManagers.end())
     {
         mManagers[typeid(T)] = new T(this);
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------
+
+template <typename T, typename... Args>
+void GameManager::AddManager(Args&&... args)
+{
+    static_assert(std::is_base_of<BaseManager, T>::value, "T must inherit from BaseManager");
+
+    if (mManagers.find(typeid(T)) == mManagers.end())
+    {
+        mManagers[typeid(T)] = new T(this, std::forward<Args>(args)...);
     }
 }
 
@@ -540,88 +542,6 @@ std::vector<std::string> GameManager::GetCommonResourcePaths()
         "Art/Background/backgroundFar.png",
         "Art/Background/backgroundReallyFar.png"
     };
-}
-
-//------------------------------------------------------------------------------------------------------------------------
-
-void GameManager::InitializeParallaxLayers()
-{
-    auto * pResourceManager = GetManager<ResourceManager>();
-    if (!pResourceManager)
-    {
-        return;
-    }
-
-    std::vector<std::pair<std::string, float>> layerConfigs = {
-        {"Art/Background/backgroundFar.png", 0.7f},
-        {"Art/Background/backgroundReallyFar.png", .9f},
-    };
-
-    for (const auto & [texturePath, parallaxSpeed] : layerConfigs)
-    {
-        ResourceId resource(texturePath);
-        auto pTexture = pResourceManager->GetTexture(resource);
-        if (!pTexture)
-        {
-            throw std::runtime_error("Failed to load background layer: " + texturePath);
-        }
-
-        // Create three sprites per layer for seamless scrolling
-        ParallaxLayer layer;
-        layer.parallaxSpeed = parallaxSpeed;
-
-        for (int i = 0; i < 3; ++i)
-        {
-            sf::Sprite sprite(*pTexture);
-            sprite.setScale(
-                float(mpWindow->getSize().x) / sprite.getTexture()->getSize().x,
-                float(mpWindow->getSize().y) / sprite.getTexture()->getSize().y
-            );
-            sprite.setPosition(i * sprite.getGlobalBounds().width, 0);
-            layer.mSprites.push_back(sprite);
-        }
-
-        mParallaxLayers.push_back(layer);
-    }
-}
-
-//------------------------------------------------------------------------------------------------------------------------
-
-void GameManager::UpdateParallaxLayers(float deltaTime, float playerSpeedX)
-{
-    for (auto & layer : mParallaxLayers)
-    {
-        float offset = -playerSpeedX * layer.parallaxSpeed * deltaTime;
-
-        for (auto & sprite : layer.mSprites)
-        {
-            sprite.move(offset, 0.0f);
-
-            // If the sprite goes off-screen to the left, reposition it to the right
-            if (sprite.getPosition().x + sprite.getGlobalBounds().width < 0)
-            {
-                float maxRight = 0;
-                for (const auto & s : layer.mSprites)
-                {
-                    maxRight = std::max(maxRight, s.getPosition().x);
-                }
-                sprite.setPosition(maxRight + sprite.getGlobalBounds().width, sprite.getPosition().y);
-            }
-        }
-    }
-}
-
-//------------------------------------------------------------------------------------------------------------------------
-
-void GameManager::RenderParallaxLayers()
-{
-    for (const auto & layer : mParallaxLayers)
-    {
-        for (const auto & sprite : layer.mSprites)
-        {
-            mpWindow->draw(sprite);
-        }
-    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------

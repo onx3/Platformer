@@ -1,9 +1,14 @@
 #include "TileEditor.h"
-#include "imgui.h"
+#include <filesystem>
+#include <iostream>
+#include <vector>
 #include <fstream>
 
-TileEditor::TileEditor(int width, int height, int tileSize)
-	: mWidth(width)
+class GameManager;
+
+TileEditor::TileEditor(GameManager * pGameManager, int width, int height, int tileSize)
+	: BaseManager(pGameManager)
+	, mWidth(width)
 	, mHeight(height)
 	, mTileSize(tileSize)
 	, mSelectedTileId(0)
@@ -25,6 +30,8 @@ void TileEditor::Initalize()
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 	ImGui::StyleColorsDark();
+
+	LoadTileTextures();
 }
 
 
@@ -35,14 +42,36 @@ void TileEditor::RenderEditor()
 	ImGui::Begin("TileEditor");
 
 	ImGui::Text("TilePalette");
-	for (int ii = 0; ii < 10; ++ii)
+	int count = 0;
+
+	auto * pResourceManager = mpGameManager->GetManager<ResourceManager>();
+	if (!pResourceManager)
 	{
-		std::string textureIDLabel = "Tile" + std::to_string(ii);
-		if (ImGui::ImageButton(textureIDLabel.c_str(), (ImTextureID)(intptr_t)ii, ImVec2(32, 32), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1)))
+		ImGui::Text("ResourceManager not available!");
+		ImGui::End();
+		return;
+	}
+
+	for (auto & [tileId, resId] : mTileTextures)
+	{
+		// Retrieve the texture using ResourceId
+		auto pTexture = pResourceManager->GetTexture(resId);
+		if (!pTexture)
 		{
-			mSelectedTileId = ii;
+			ImGui::Text("Missing texture for Tile ID: %d", tileId);
+			continue;
 		}
-		if ((ii + 1) % 4 != 0)
+
+		// Convert the texture pointer to ImGui format
+		ImTextureID textureId = reinterpret_cast<ImTextureID>(pTexture.get());
+
+		// Render the texture as an image button
+		if (ImGui::ImageButton(std::to_string(tileId).c_str(), textureId, ImVec2(32, 32)))
+		{
+			mSelectedTileId = tileId;
+		}
+
+		if (++count % 4 != 0)
 		{
 			ImGui::SameLine();
 		}
@@ -50,28 +79,8 @@ void TileEditor::RenderEditor()
 
 	ImGui::Separator();
 	ImGui::Text("Tilemap");
-
-	for (int yy = 0; yy < mHeight; ++yy)
-	{
-		for (int xx = 0; xx < mWidth; ++xx)
-		{
-			ImGui::PushID(yy * mWidth + xx);
-			std::string gridTileLabel = "GridTile" + std::to_string(xx) + "_" + std::to_string(yy);
-			ImGui::ImageButton(gridTileLabel.c_str(), (ImTextureID)(intptr_t)mTilemap[yy][xx], ImVec2(float(mTileSize), float(mTileSize)), ImVec2(0, 0), ImVec2(1, 1), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1));
-
-			if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
-			{
-				SetTile(xx, yy, mSelectedTileId);
-			}
-
-			ImGui::PopID();
-			if (xx < mWidth - 1)
-			{
-				ImGui::SameLine();
-			}
-		}
-	}
 	ImGui::Separator();
+
 	if (ImGui::Button("Save"))
 	{
 		SaveTilemap("TileMap.json");
@@ -107,6 +116,55 @@ int TileEditor::GetTile(int x, int y) const
 
 //------------------------------------------------------------------------------------------------------------------------
 
+void TileEditor::LoadTileTextures()
+{
+	namespace fs = std::filesystem;
+	std::string folderPath = "Art/Tiles";
+
+	if (!fs::exists(folderPath) || !fs::is_directory(folderPath))
+	{
+		std::cerr << "Tile folder does not exist or is not a directory: " << folderPath << std::endl;
+		return;
+	}
+
+	int tileId = 0; // Start assigning tile IDs
+	for (const auto & entry : fs::directory_iterator(folderPath))
+	{
+		if (entry.is_regular_file())
+		{
+			const std::string filePath = entry.path().string();
+
+			ResourceId resId(filePath);
+			mTileTextures.emplace(tileId, resId);
+
+			tileId++;
+		}
+	}
+}
+
+//------------------------------------------------------------------------------------------------------------------------
+
+ImTextureID TileEditor::LoadTextureFromFile(const std::string & filePath)
+{
+	auto * pResourceManager = mpGameManager->GetManager<ResourceManager>();
+
+	if (pResourceManager)
+	{
+		ResourceId resId(filePath);
+		auto pTexture = pResourceManager->GetTexture(resId);
+
+		if (!pTexture)
+		{
+			std::cerr << "Failed to load texture: " << filePath << std::endl;
+			//return nullptr;
+		}
+
+		return reinterpret_cast<ImTextureID>(pTexture.get());
+	}
+}
+
+//------------------------------------------------------------------------------------------------------------------------
+
 void TileEditor::SaveTilemap(const std::string & filePath)
 {
 	//json j;
@@ -138,3 +196,7 @@ void TileEditor::LoadTilemap(const std::string & filePath)
 		mTilemap = j["tilemap"].get<std::vector<std::vector<int>>>();
 	}*/
 }
+
+//------------------------------------------------------------------------------------------------------------------------
+// EOF
+//------------------------------------------------------------------------------------------------------------------------
