@@ -1,3 +1,4 @@
+#include "AstroidsPrivate.h"
 #include "TileEditor.h"
 #include <filesystem>
 #include <iostream>
@@ -54,7 +55,6 @@ void TileEditor::RenderEditor()
 
 	for (auto & [tileId, resId] : mTileTextures)
 	{
-		// Retrieve the texture using ResourceId
 		auto pTexture = pResourceManager->GetTexture(resId);
 		if (!pTexture)
 		{
@@ -62,10 +62,8 @@ void TileEditor::RenderEditor()
 			continue;
 		}
 
-		// Convert the texture pointer to ImGui format
 		ImTextureID textureId = reinterpret_cast<ImTextureID>(pTexture.get());
 
-		// Render the texture as an image button
 		if (ImGui::ImageButton(std::to_string(tileId).c_str(), textureId, ImVec2(32, 32)))
 		{
 			mSelectedTileId = tileId;

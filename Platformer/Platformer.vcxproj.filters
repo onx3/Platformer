@@ -88,26 +88,26 @@
     <ClCompile Include="SpriteComponent.cpp">
       <Filter>Components</Filter>
     </ClCompile>
-    <ClCompile Include="..\ExtLibs\ImGui-sfml\imgui-SFML.cpp">
-      <Filter>ExtLibs\ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ExtLibs\ImGui\imgui_widgets.cpp">
-      <Filter>ExtLibs\ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ExtLibs\ImGui\imgui.cpp">
-      <Filter>ExtLibs\ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ExtLibs\ImGui\imgui_demo.cpp">
-      <Filter>ExtLibs\ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ExtLibs\ImGui\imgui_draw.cpp">
-      <Filter>ExtLibs\ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ExtLibs\ImGui\imgui_tables.cpp">
-      <Filter>ExtLibs\ImGui</Filter>
-    </ClCompile>
     <ClCompile Include="TileEditor.cpp">
       <Filter>DebugTileEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="DungeonManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui.cpp">
+      <Filter>ExtLibs\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_draw.cpp">
+      <Filter>ExtLibs\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_tables.cpp">
+      <Filter>ExtLibs\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_widgets.cpp">
+      <Filter>ExtLibs\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui-SFML.cpp">
+      <Filter>ExtLibs\ImGui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -177,20 +177,9 @@
     <ClInclude Include="SpriteComponent.h">
       <Filter>Components</Filter>
     </ClInclude>
-    <ClInclude Include="..\ExtLibs\ImGui-sfml\imgui-SFML.h">
-      <Filter>ExtLibs\ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ExtLibs\ImGui\imconfig.h">
-      <Filter>ExtLibs\ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ExtLibs\ImGui\imgui.h">
-      <Filter>ExtLibs\ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ExtLibs\ImGui\imgui_internal.h">
-      <Filter>ExtLibs\ImGui</Filter>
-    </ClInclude>
     <ClInclude Include="TileEditor.h">
       <Filter>DebugTileEditor</Filter>
     </ClInclude>
+    <ClInclude Include="DungeonManager.h" />
   </ItemGroup>
 </Project>

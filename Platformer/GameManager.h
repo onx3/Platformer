@@ -12,7 +12,7 @@
 #include "TileEditor.h"
 
 class TileEditor;
-
+class BaseManager;
 struct ParallaxLayer
 {
 	std::vector<sf::Sprite> mSprites;

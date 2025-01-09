@@ -13,6 +13,7 @@
 #include "DropManager.h"
 #include "ResourceManager.h"
 #include "TileEditor.h"
+#include "DungeonManager.h"
 
 GameManager::GameManager(WindowManager & windowManager)
     : mWindowManager(windowManager)
@@ -42,6 +43,7 @@ GameManager::GameManager(WindowManager & windowManager)
     AddManager<ScoreManager>();
     AddManager<DropManager>();
     AddManager<TileEditor>(20, 15, 32);
+    AddManager<DungeonManager>(60, 34);
 
     // Game Audio
     /*{
@@ -163,6 +165,37 @@ void GameManager::Update(float deltaTime)
         if (manager.second)
         {
             manager.second->Update(deltaTime);
+        }
+    }
+
+    // DungeonManager
+    {
+        auto * pDungeonManager = GetManager<DungeonManager>();
+        if (pDungeonManager)
+        {
+            pDungeonManager->GenerateDungeon();
+            const auto & grid = pDungeonManager->GetDungeonGrid();
+
+            // Convert the grid into GameObjects
+            for (int y = 0; y < grid.size(); ++y)
+            {
+                for (int x = 0; x < grid[y].size(); ++x)
+                {
+                    EDungeonPiece piece = grid[y][x];
+                    switch (piece)
+                    {
+                        case EDungeonPiece::Floor:
+                            //CreateNewGameObject(ETeam::Neutral, mpRootGameObject)->AddComponent<FloorComponent>();
+                            break;
+                        case EDungeonPiece::Wall:
+                            //CreateNewGameObject(ETeam::Neutral, mpRootGameObject)->AddComponent<WallComponent>();
+                            break;
+                        case EDungeonPiece::Empty:
+                            // Do nothing for empty tiles
+                            break;
+                    }
+                }
+            }
         }
     }
 }
@@ -383,11 +416,45 @@ void GameManager::Render(float deltaTime)
 
 void GameManager::RenderDebugMode()
 {
+#if 0
     DrawGrid(32.f, 32.f);
     auto * pTileEditor = GetManager<TileEditor>();
     if (pTileEditor)
     {
         pTileEditor->RenderEditor();
+    }
+#endif
+
+    auto * pDungeonManager = GetManager<DungeonManager>();
+    if (pDungeonManager)
+    {
+        const auto & grid = pDungeonManager->GetDungeonGrid();
+        float cellWidth = 32.f;
+        float cellHeight = 32.f;
+
+        for (int y = 0; y < grid.size(); ++y)
+        {
+            for (int x = 0; x < grid[y].size(); ++x)
+            {
+                sf::RectangleShape rect(sf::Vector2f(cellWidth, cellHeight));
+                rect.setPosition(x * cellWidth, y * cellHeight);
+
+                switch (grid[y][x])
+                {
+                    case EDungeonPiece::Floor:
+                        rect.setFillColor(sf::Color::White);
+                        break;
+                    case EDungeonPiece::Wall:
+                        rect.setFillColor(sf::Color::Blue);
+                        break;
+                    case EDungeonPiece::Empty:
+                        rect.setFillColor(sf::Color::Black);
+                        break;
+                }
+
+                mpWindow->draw(rect);
+            }
+        }
     }
 }
 
