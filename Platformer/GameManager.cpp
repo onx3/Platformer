@@ -440,10 +440,13 @@ void GameManager::RenderDebugMode()
                 switch (grid[y][x])
                 {
                     case EDungeonPiece::Floor:
-                        rect.setFillColor(sf::Color::White);
+                        rect.setFillColor(sf::Color::Green);
                         break;
-                    case EDungeonPiece::Wall:
+                    case EDungeonPiece::Water:
                         rect.setFillColor(sf::Color::Blue);
+                        break;
+                    case EDungeonPiece::WaterEdge:
+                        rect.setFillColor(sf::Color::Yellow);
                         break;
                     case EDungeonPiece::Empty:
                         rect.setFillColor(sf::Color::Black);

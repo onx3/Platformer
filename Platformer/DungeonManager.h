@@ -7,8 +7,9 @@
 enum class EDungeonPiece
 {
     Empty,
-    Wall,
-    Floor
+    Water,
+    Floor,
+    WaterEdge
 };
 
 struct Walker
@@ -16,6 +17,7 @@ struct Walker
     int x;
     int y;
     int steps;
+    EDungeonPiece lastPlacedBlock = EDungeonPiece::Empty;
 };
 
 class BaseManager;
@@ -43,6 +45,5 @@ private:
     int mCurrentStep;
     std::vector<Walker> mWalkers;
     std::unordered_map<EDungeonPiece, std::vector<EDungeonPiece>> mNeighborRules;
-    std::vector<std::pair<int, int>> mWalkerSteps;
     std::vector<std::vector<EDungeonPiece>> mDungeonGrid;
 };

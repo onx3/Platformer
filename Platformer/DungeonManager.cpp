@@ -9,30 +9,24 @@ DungeonManager::DungeonManager(GameManager * pGameManager, int width, int height
     , mWidth(width)
     , mHeight(height)
     , mTimeSinceLastStep(0.f)
-    , mStepDelay(0.001f) // Set a default delay
+    , mStepDelay(0.001f)
     , mCurrentStep(0)
-    , mWalkers()
-    , mWalkerSteps()
     , mDungeonGrid(mHeight, std::vector<EDungeonPiece>(mWidth, EDungeonPiece::Empty))
 {
     mNeighborRules = {
-        { EDungeonPiece::Floor, { EDungeonPiece::Floor, EDungeonPiece::Wall, EDungeonPiece::Empty } },
-        { EDungeonPiece::Wall, { EDungeonPiece::Floor, EDungeonPiece::Wall, EDungeonPiece::Empty } },
-        { EDungeonPiece::Empty, { EDungeonPiece::Floor, EDungeonPiece::Wall } }
+    { EDungeonPiece::Floor, { EDungeonPiece::Floor, EDungeonPiece::WaterEdge, EDungeonPiece::Empty } },
+    { EDungeonPiece::Water, { EDungeonPiece::Water, EDungeonPiece::WaterEdge, EDungeonPiece::Empty } },
+    { EDungeonPiece::Empty, { EDungeonPiece::Floor, EDungeonPiece::Water } },
+    { EDungeonPiece::WaterEdge, { EDungeonPiece::Floor, EDungeonPiece::Water } }
     };
 
-    // Seed the random number generator
     std::srand(static_cast<unsigned>(std::time(nullptr)));
 
-    // Initialize 3 walkers
-    for (int i = 0; i < 15; ++i)
-    {
-        Walker walker;
-        walker.x = rand() % mWidth;
-        walker.y = rand() % mHeight;
-        walker.steps = 500;
-        mWalkers.push_back(walker);
-    }
+    Walker walker;
+    walker.x = mWidth / 2;
+    walker.y = mHeight / 2;
+    walker.steps = 500;
+    mWalkers.push_back(walker);
 }
 
 //------------------------------------------------------------------------------------------------------------------------
@@ -46,7 +40,7 @@ const std::vector<std::vector<EDungeonPiece>> & DungeonManager::GetDungeonGrid()
 
 void DungeonManager::Update(float deltaTime)
 {
-
+    
 }
 
 //------------------------------------------------------------------------------------------------------------------------
@@ -59,14 +53,43 @@ void DungeonManager::DebugUpdate(float deltaTime)
     {
         mTimeSinceLastStep -= mStepDelay;
 
-        // Perform one step for all walkers
-        for (auto & walker : mWalkers)
+        std::vector<Walker> newWalkers;
+
+        for (auto it = mWalkers.begin(); it != mWalkers.end();)
         {
-            if (walker.steps > 0)
+            if (it->steps <= 0)
             {
-                RandomWalkStep(walker);
+                it = mWalkers.erase(it);
+                continue;
+            }
+            int stepsPerUpdate = 10;
+            for (int ii = 0; ii < stepsPerUpdate && it->steps > 0; ++ii)
+            {
+                RandomWalkStep(*it);
+            }
+
+            // 10% chance to spawn a new walker
+            if (std::rand() % 100 < 10 && mWalkers.size() < 50)
+            {
+                Walker newWalker;
+                newWalker.x = it->x;
+                newWalker.y = it->y;
+                newWalker.steps = 500;
+                newWalkers.push_back(newWalker);
+            }
+
+            // 5% chance to delete the walker (ensure at least 1 remains)
+            if (std::rand() % 100 < 5 && mWalkers.size() > 1)
+            {
+                it = mWalkers.erase(it);
+            }
+            else
+            {
+                ++it;
             }
         }
+
+        mWalkers.insert(mWalkers.end(), newWalkers.begin(), newWalkers.end());
     }
 }
 
@@ -76,11 +99,35 @@ void DungeonManager::RandomWalkStep(Walker & walker)
 {
     if (walker.steps <= 0) return;
 
-    // Place a tile
-    if (CanPlaceBlock(walker.x, walker.y, EDungeonPiece::Floor, mNeighborRules))
+    // Weighted random chance for block placement
+    EDungeonPiece blockToPlace;
+
+    // Determine if the walker is near water
+    bool nearWater = false;
+    if (walker.y > 0 && mDungeonGrid[walker.y - 1][walker.x] == EDungeonPiece::Water) nearWater = true;
+    if (walker.x > 0 && mDungeonGrid[walker.y][walker.x - 1] == EDungeonPiece::Water) nearWater = true;
+    if (walker.y < mHeight - 1 && mDungeonGrid[walker.y + 1][walker.x] == EDungeonPiece::Water) nearWater = true;
+    if (walker.x < mWidth - 1 && mDungeonGrid[walker.y][walker.x + 1] == EDungeonPiece::Water) nearWater = true;
+
+    // Adjust placement chance
+    if (nearWater && std::rand() % 100 < 80) // 80% chance to place water near water
     {
-        mDungeonGrid[walker.y][walker.x] = EDungeonPiece::Floor;
-        mWalkerSteps.push_back({ walker.x, walker.y }); // Log the position
+        blockToPlace = EDungeonPiece::Water;
+    }
+    else if (std::rand() % 100 < 10) // 10% chance for water in general
+    {
+        blockToPlace = EDungeonPiece::Water;
+    }
+    else
+    {
+        blockToPlace = EDungeonPiece::Floor;
+    }
+
+    // Attempt to place the block
+    if (CanPlaceBlock(walker.x, walker.y, blockToPlace, mNeighborRules))
+    {
+        mDungeonGrid[walker.y][walker.x] = blockToPlace;
+        walker.lastPlacedBlock = blockToPlace;
     }
 
     // Move the walker
@@ -124,7 +171,7 @@ void DungeonManager::AddScreenBounds()
         {
             if (y == 0 || y == mHeight - 1 || x == 0 || x == mWidth - 1)
             {
-                mDungeonGrid[y][x] = EDungeonPiece::Wall;
+                mDungeonGrid[y][x] = EDungeonPiece::Water;
             }
         }
     }
