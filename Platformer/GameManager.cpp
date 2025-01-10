@@ -185,7 +185,7 @@ void GameManager::Update(float deltaTime)
                     EDungeonPiece piece = grid[y][x];
                     switch (piece)
                     {
-                        case EDungeonPiece::Floor:
+                        case EDungeonPiece::Grass:
                             //CreateNewGameObject(ETeam::Neutral, mpRootGameObject)->AddComponent<FloorComponent>();
                             break;
                         case EDungeonPiece::Wall:
@@ -217,7 +217,6 @@ void GameManager::DebugUpdate(float deltaTime)
         if (pDungeonManager)
         {
             //pDungeonManager->GenerateDungeon();
-            pDungeonManager->DebugUpdate(deltaTime);
         }
     }
 }
@@ -439,13 +438,13 @@ void GameManager::RenderDebugMode()
 
                 switch (grid[y][x])
                 {
-                    case EDungeonPiece::Floor:
+                    case EDungeonPiece::Grass:
                         rect.setFillColor(sf::Color::Green);
                         break;
                     case EDungeonPiece::Water:
                         rect.setFillColor(sf::Color::Blue);
                         break;
-                    case EDungeonPiece::WaterEdge:
+                    case EDungeonPiece::Sand:
                         rect.setFillColor(sf::Color::Yellow);
                         break;
                     case EDungeonPiece::Empty:

@@ -1,8 +1,12 @@
 #include "AstroidsPrivate.h"
 #include "DungeonManager.h"
 #include <unordered_map>
+#include <algorithm>
 #include <cstdlib>
 #include <ctime>
+#include <cmath>
+
+//------------------------------------------------------------------------------------------------------------------------
 
 DungeonManager::DungeonManager(GameManager * pGameManager, int width, int height)
     : BaseManager(pGameManager)
@@ -13,20 +17,15 @@ DungeonManager::DungeonManager(GameManager * pGameManager, int width, int height
     , mCurrentStep(0)
     , mDungeonGrid(mHeight, std::vector<EDungeonPiece>(mWidth, EDungeonPiece::Empty))
 {
-    mNeighborRules = {
-    { EDungeonPiece::Floor, { EDungeonPiece::Floor, EDungeonPiece::WaterEdge, EDungeonPiece::Empty } },
-    { EDungeonPiece::Water, { EDungeonPiece::Water, EDungeonPiece::WaterEdge, EDungeonPiece::Empty } },
-    { EDungeonPiece::Empty, { EDungeonPiece::Floor, EDungeonPiece::Water } },
-    { EDungeonPiece::WaterEdge, { EDungeonPiece::Floor, EDungeonPiece::Water } }
-    };
-
     std::srand(static_cast<unsigned>(std::time(nullptr)));
 
-    Walker walker;
-    walker.x = mWidth / 2;
-    walker.y = mHeight / 2;
-    walker.steps = 500;
-    mWalkers.push_back(walker);
+    mNeighborRules = {
+        { EDungeonPiece::Water, { EDungeonPiece::Water, EDungeonPiece::Sand, EDungeonPiece::Empty} },
+        { EDungeonPiece::Sand,  { EDungeonPiece::Water, EDungeonPiece::Sand, EDungeonPiece::Grass, EDungeonPiece::Empty } },
+        { EDungeonPiece::Grass, { EDungeonPiece::Sand, EDungeonPiece::Grass, EDungeonPiece::Empty} }
+    };
+
+    GenerateDungeonGrid();
 }
 
 //------------------------------------------------------------------------------------------------------------------------
@@ -40,119 +39,67 @@ const std::vector<std::vector<EDungeonPiece>> & DungeonManager::GetDungeonGrid()
 
 void DungeonManager::Update(float deltaTime)
 {
-    
+    // Implement any runtime updates if necessary
 }
 
 //------------------------------------------------------------------------------------------------------------------------
 
-void DungeonManager::DebugUpdate(float deltaTime)
+void DungeonManager::GenerateDungeonGrid()
 {
-    mTimeSinceLastStep += deltaTime;
+    float scale = 0.1f;  // Adjust to control the size of terrain features
+    int seed = std::rand(); // Use a random seed for variation
+    float maxOffset = .05f; // Allow slightly more variation in noise
 
-    if (mTimeSinceLastStep >= mStepDelay)
+    std::vector<std::vector<float>> noiseGrid(mHeight, std::vector<float>(mWidth, 0.0f));
+
+    for (int y = 0; y < mHeight; ++y)
     {
-        mTimeSinceLastStep -= mStepDelay;
-
-        std::vector<Walker> newWalkers;
-
-        for (auto it = mWalkers.begin(); it != mWalkers.end();)
+        for (int x = 0; x < mWidth; ++x)
         {
-            if (it->steps <= 0)
-            {
-                it = mWalkers.erase(it);
-                continue;
-            }
-            int stepsPerUpdate = 10;
-            for (int ii = 0; ii < stepsPerUpdate && it->steps > 0; ++ii)
-            {
-                RandomWalkStep(*it);
-            }
+            // Generate Perlin noise
+            float baseValue = Perlin(x * scale, y * scale, seed);
 
-            // 10% chance to spawn a new walker
-            if (std::rand() % 100 < 10 && mWalkers.size() < 50)
-            {
-                Walker newWalker;
-                newWalker.x = it->x;
-                newWalker.y = it->y;
-                newWalker.steps = 500;
-                newWalkers.push_back(newWalker);
-            }
+            // Apply clamping for smoother transitions
+            if (x > 0)
+                baseValue = std::clamp(baseValue, noiseGrid[y][x - 1] - maxOffset, noiseGrid[y][x - 1] + maxOffset);
+            if (y > 0)
+                baseValue = std::clamp(baseValue, noiseGrid[y - 1][x] - maxOffset, noiseGrid[y - 1][x] + maxOffset);
+            noiseGrid[y][x] = baseValue;
 
-            // 5% chance to delete the walker (ensure at least 1 remains)
-            if (std::rand() % 100 < 5 && mWalkers.size() > 1)
+            // Normalize noise to [0, 1]
+            float normalized = (baseValue + 1.0f) / 2.0f;
+
+            // Assign terrain types based on thresholds and neighbor rules
+            if (normalized < 0.4f && CanPlaceTile(x, y, EDungeonPiece::Water))
             {
-                it = mWalkers.erase(it);
+                mDungeonGrid[y][x] = EDungeonPiece::Water;
+            }
+            else if (normalized < 0.5f && CanPlaceTile(x, y, EDungeonPiece::Sand))
+            {
+                mDungeonGrid[y][x] = EDungeonPiece::Sand;
+            }
+            else if (CanPlaceTile(x, y, EDungeonPiece::Grass))
+            {
+                mDungeonGrid[y][x] = EDungeonPiece::Grass;
             }
             else
             {
-                ++it;
+                // Fallback case: default to Sand
+                mDungeonGrid[y][x] = EDungeonPiece::Sand;
             }
         }
-
-        mWalkers.insert(mWalkers.end(), newWalkers.begin(), newWalkers.end());
     }
 }
 
 //------------------------------------------------------------------------------------------------------------------------
 
-void DungeonManager::RandomWalkStep(Walker & walker)
-{
-    if (walker.steps <= 0) return;
-
-    // Weighted random chance for block placement
-    EDungeonPiece blockToPlace;
-
-    // Determine if the walker is near water
-    bool nearWater = false;
-    if (walker.y > 0 && mDungeonGrid[walker.y - 1][walker.x] == EDungeonPiece::Water) nearWater = true;
-    if (walker.x > 0 && mDungeonGrid[walker.y][walker.x - 1] == EDungeonPiece::Water) nearWater = true;
-    if (walker.y < mHeight - 1 && mDungeonGrid[walker.y + 1][walker.x] == EDungeonPiece::Water) nearWater = true;
-    if (walker.x < mWidth - 1 && mDungeonGrid[walker.y][walker.x + 1] == EDungeonPiece::Water) nearWater = true;
-
-    // Adjust placement chance
-    if (nearWater && std::rand() % 100 < 80) // 80% chance to place water near water
-    {
-        blockToPlace = EDungeonPiece::Water;
-    }
-    else if (std::rand() % 100 < 10) // 10% chance for water in general
-    {
-        blockToPlace = EDungeonPiece::Water;
-    }
-    else
-    {
-        blockToPlace = EDungeonPiece::Floor;
-    }
-
-    // Attempt to place the block
-    if (CanPlaceBlock(walker.x, walker.y, blockToPlace, mNeighborRules))
-    {
-        mDungeonGrid[walker.y][walker.x] = blockToPlace;
-        walker.lastPlacedBlock = blockToPlace;
-    }
-
-    // Move the walker
-    int direction = std::rand() % 4;
-    switch (direction)
-    {
-        case 0: if (walker.y > 0) --walker.y; break;               // Up
-        case 1: if (walker.x < mWidth - 1) ++walker.x; break;     // Right
-        case 2: if (walker.y < mHeight - 1) ++walker.y; break;    // Down
-        case 3: if (walker.x > 0) --walker.x; break;              // Left
-    }
-
-    --walker.steps; // Decrement steps
-}
-
-//------------------------------------------------------------------------------------------------------------------------
-
-bool DungeonManager::CanPlaceBlock(int x, int y, EDungeonPiece type, const std::unordered_map<EDungeonPiece, std::vector<EDungeonPiece>> & neighborRules) const
+bool DungeonManager::CanPlaceTile(int x, int y, EDungeonPiece type) const
 {
     if (x < 0 || x >= mWidth || y < 0 || y >= mHeight) return false;
-    if (mDungeonGrid[y][x] != EDungeonPiece::Empty) return false; // Only place on empty tiles
 
-    // Validate neighbors
-    std::vector<EDungeonPiece> validNeighbors = neighborRules.at(type);
+    const auto & validNeighbors = mNeighborRules.at(type);
 
+    // Check neighbors
     if (y > 0 && std::find(validNeighbors.begin(), validNeighbors.end(), mDungeonGrid[y - 1][x]) == validNeighbors.end()) return false; // Up
     if (x < mWidth - 1 && std::find(validNeighbors.begin(), validNeighbors.end(), mDungeonGrid[y][x + 1]) == validNeighbors.end()) return false; // Right
     if (y < mHeight - 1 && std::find(validNeighbors.begin(), validNeighbors.end(), mDungeonGrid[y + 1][x]) == validNeighbors.end()) return false; // Down
@@ -163,18 +110,58 @@ bool DungeonManager::CanPlaceBlock(int x, int y, EDungeonPiece type, const std::
 
 //------------------------------------------------------------------------------------------------------------------------
 
-void DungeonManager::AddScreenBounds()
+float DungeonManager::Lerp(float a, float b, float t)
 {
-    for (int y = 0; y < mHeight; ++y)
-    {
-        for (int x = 0; x < mWidth; ++x)
-        {
-            if (y == 0 || y == mHeight - 1 || x == 0 || x == mWidth - 1)
-            {
-                mDungeonGrid[y][x] = EDungeonPiece::Water;
-            }
-        }
-    }
+    return a + t * (b - a);
+}
+
+//------------------------------------------------------------------------------------------------------------------------
+
+float DungeonManager::Fade(float t)
+{
+    return t * t * t * (t * (t * 6 - 15) + 10);
+}
+
+//------------------------------------------------------------------------------------------------------------------------
+
+int DungeonManager::Hash(int x, int y, int seed = 0)
+{
+    int h = x * 374761393 + y * 668265263 + seed * 982451653;
+    h = (h ^ (h >> 13)) * 1274126177;
+    return h & 0x7FFFFFFF;
+}
+
+//------------------------------------------------------------------------------------------------------------------------
+
+float DungeonManager::Gradient(int x, int y, int seed = 0)
+{
+    int h = Hash(x, y, seed);
+    return (h % 256) / 255.0f * 2.0f - 1.0f;
+}
+
+//------------------------------------------------------------------------------------------------------------------------
+
+float DungeonManager::Perlin(float x, float y, int seed = 0)
+{
+    int x0 = (int)floor(x);
+    int x1 = x0 + 1;
+    int y0 = (int)floor(y);
+    int y1 = y0 + 1;
+
+    float sx = x - (float)x0;
+    float sy = y - (float)y0;
+
+    float n0, n1, ix0, ix1;
+
+    n0 = Gradient(x0, y0, seed);
+    n1 = Gradient(x1, y0, seed);
+    ix0 = Lerp(n0, n1, Fade(sx));
+
+    n0 = Gradient(x0, y1, seed);
+    n1 = Gradient(x1, y1, seed);
+    ix1 = Lerp(n0, n1, Fade(sx));
+
+    return Lerp(ix0, ix1, Fade(sy)); // Final value in range [-1, 1]
 }
 
 //------------------------------------------------------------------------------------------------------------------------
