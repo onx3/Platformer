@@ -29,7 +29,7 @@ int main()
             }
             else
             {
-                pGameManager->DebugUpdate();
+                pGameManager->DebugUpdate(deltaTime);
                 clock.restart();
             }
             pGameManager->Render(deltaTime);

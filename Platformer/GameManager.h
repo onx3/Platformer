@@ -31,7 +31,7 @@ public:
 
 	void Update(float deltaTime);
 
-	void DebugUpdate();
+	void DebugUpdate(float deltaTime);
 
 	void UpdateGameObjects(float deltaTime);
 

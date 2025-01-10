@@ -1,55 +1,38 @@
 #include "AstroidsPrivate.h"
 #include "DungeonManager.h"
+#include <unordered_map>
+#include <cstdlib>
+#include <ctime>
 
-DungeonManager::DungeonManager(GameManager * pGameManger, int width, int height)
-	: BaseManager(pGameManger)
-	, mWidth(width)
-	, mHeight(height)
-	, mDungeonGrid()
+DungeonManager::DungeonManager(GameManager * pGameManager, int width, int height)
+    : BaseManager(pGameManager)
+    , mWidth(width)
+    , mHeight(height)
+    , mTimeSinceLastStep(0.f)
+    , mStepDelay(0.001f) // Set a default delay
+    , mCurrentStep(0)
+    , mWalkers()
+    , mWalkerSteps()
+    , mDungeonGrid(mHeight, std::vector<EDungeonPiece>(mWidth, EDungeonPiece::Empty))
 {
-	mDungeonGrid = std::vector<std::vector<EDungeonPiece>>(mHeight, std::vector<EDungeonPiece>(mWidth, EDungeonPiece::Empty));
-}
+    mNeighborRules = {
+        { EDungeonPiece::Floor, { EDungeonPiece::Floor, EDungeonPiece::Wall, EDungeonPiece::Empty } },
+        { EDungeonPiece::Wall, { EDungeonPiece::Floor, EDungeonPiece::Wall, EDungeonPiece::Empty } },
+        { EDungeonPiece::Empty, { EDungeonPiece::Floor, EDungeonPiece::Wall } }
+    };
 
-//------------------------------------------------------------------------------------------------------------------------
+    // Seed the random number generator
+    std::srand(static_cast<unsigned>(std::time(nullptr)));
 
-void DungeonManager::GenerateDungeon()
-{
-    // Initialize the grid
-    mDungeonGrid = std::vector<std::vector<EDungeonPiece>>(mHeight, std::vector<EDungeonPiece>(mWidth, EDungeonPiece::Empty));
-
-    int roomCount = 10; // Number of rooms to generate
-    for (int i = 0; i < roomCount; ++i)
+    // Initialize 3 walkers
+    for (int i = 0; i < 15; ++i)
     {
-        bool roomPlaced = false;
-        int attemptLimit = 100; // Prevent infinite loops
-        int attempts = 0;
-
-        while (!roomPlaced && attempts < attemptLimit)
-        {
-            ++attempts;
-
-            // Generate random room dimensions and position
-            int roomWidth = rand() % 6 + 3; // Room width between 3 and 8
-            int roomHeight = rand() % 6 + 3; // Room height between 3 and 8
-            int roomX = rand() % (mWidth - roomWidth - 2) + 1; // Ensure space for walls
-            int roomY = rand() % (mHeight - roomHeight - 2) + 1; // Ensure space for walls
-
-            // Check if the room overlaps with existing rooms or walls
-            if (CanPlaceRoom(roomX, roomY, roomWidth, roomHeight))
-            {
-                AddRoomWithWalls(roomX, roomY, roomWidth, roomHeight);
-                roomPlaced = true;
-            }
-        }
-
-        if (!roomPlaced)
-        {
-            std::cerr << "Failed to place room after " << attemptLimit << " attempts.\n";
-        }
+        Walker walker;
+        walker.x = rand() % mWidth;
+        walker.y = rand() % mHeight;
+        walker.steps = 500;
+        mWalkers.push_back(walker);
     }
-
-    // Add screen bounds
-    AddScreenBounds();
 }
 
 //------------------------------------------------------------------------------------------------------------------------
@@ -63,26 +46,25 @@ const std::vector<std::vector<EDungeonPiece>> & DungeonManager::GetDungeonGrid()
 
 void DungeonManager::Update(float deltaTime)
 {
-    // No dynamic updates required for static dungeon generation.
+
 }
 
 //------------------------------------------------------------------------------------------------------------------------
 
-void DungeonManager::AddWalls()
+void DungeonManager::DebugUpdate(float deltaTime)
 {
-    for (int y = 1; y < mHeight - 1; ++y)
+    mTimeSinceLastStep += deltaTime;
+
+    if (mTimeSinceLastStep >= mStepDelay)
     {
-        for (int x = 1; x < mWidth - 1; ++x)
+        mTimeSinceLastStep -= mStepDelay;
+
+        // Perform one step for all walkers
+        for (auto & walker : mWalkers)
         {
-            if (mDungeonGrid[y][x] == EDungeonPiece::Empty)
+            if (walker.steps > 0)
             {
-                if (mDungeonGrid[y - 1][x] == EDungeonPiece::Floor ||
-                    mDungeonGrid[y + 1][x] == EDungeonPiece::Floor ||
-                    mDungeonGrid[y][x - 1] == EDungeonPiece::Floor ||
-                    mDungeonGrid[y][x + 1] == EDungeonPiece::Floor)
-                {
-                    mDungeonGrid[y][x] = EDungeonPiece::Wall;
-                }
+                RandomWalkStep(walker);
             }
         }
     }
@@ -90,55 +72,59 @@ void DungeonManager::AddWalls()
 
 //------------------------------------------------------------------------------------------------------------------------
 
-bool DungeonManager::CanPlaceRoom(int x, int y, int width, int height) const
+void DungeonManager::RandomWalkStep(Walker & walker)
 {
-    // Check if the room overlaps with any existing walls or floors
-    for (int i = y - 1; i <= y + height; ++i)
+    if (walker.steps <= 0) return;
+
+    // Place a tile
+    if (CanPlaceBlock(walker.x, walker.y, EDungeonPiece::Floor, mNeighborRules))
     {
-        for (int j = x - 1; j <= x + width; ++j)
-        {
-            if (mDungeonGrid[i][j] != EDungeonPiece::Empty)
-            {
-                return false; // Overlap detected
-            }
-        }
+        mDungeonGrid[walker.y][walker.x] = EDungeonPiece::Floor;
+        mWalkerSteps.push_back({ walker.x, walker.y }); // Log the position
     }
+
+    // Move the walker
+    int direction = std::rand() % 4;
+    switch (direction)
+    {
+        case 0: if (walker.y > 0) --walker.y; break;               // Up
+        case 1: if (walker.x < mWidth - 1) ++walker.x; break;     // Right
+        case 2: if (walker.y < mHeight - 1) ++walker.y; break;    // Down
+        case 3: if (walker.x > 0) --walker.x; break;              // Left
+    }
+
+    --walker.steps; // Decrement steps
+}
+
+//------------------------------------------------------------------------------------------------------------------------
+
+bool DungeonManager::CanPlaceBlock(int x, int y, EDungeonPiece type, const std::unordered_map<EDungeonPiece, std::vector<EDungeonPiece>> & neighborRules) const
+{
+    if (x < 0 || x >= mWidth || y < 0 || y >= mHeight) return false;
+    if (mDungeonGrid[y][x] != EDungeonPiece::Empty) return false; // Only place on empty tiles
+
+    // Validate neighbors
+    std::vector<EDungeonPiece> validNeighbors = neighborRules.at(type);
+
+    if (y > 0 && std::find(validNeighbors.begin(), validNeighbors.end(), mDungeonGrid[y - 1][x]) == validNeighbors.end()) return false; // Up
+    if (x < mWidth - 1 && std::find(validNeighbors.begin(), validNeighbors.end(), mDungeonGrid[y][x + 1]) == validNeighbors.end()) return false; // Right
+    if (y < mHeight - 1 && std::find(validNeighbors.begin(), validNeighbors.end(), mDungeonGrid[y + 1][x]) == validNeighbors.end()) return false; // Down
+    if (x > 0 && std::find(validNeighbors.begin(), validNeighbors.end(), mDungeonGrid[y][x - 1]) == validNeighbors.end()) return false; // Left
+
     return true;
-}
-
-//------------------------------------------------------------------------------------------------------------------------
-
-void DungeonManager::AddRoomWithWalls(int x, int y, int width, int height)
-{
-    // Add walls around the room
-    for (int i = y - 1; i <= y + height; ++i)
-    {
-        for (int j = x - 1; j <= x + width; ++j)
-        {
-            if (i == y - 1 || i == y + height || j == x - 1 || j == x + width)
-            {
-                mDungeonGrid[i][j] = EDungeonPiece::Wall;
-            }
-            else
-            {
-                mDungeonGrid[i][j] = EDungeonPiece::Floor;
-            }
-        }
-    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------
 
 void DungeonManager::AddScreenBounds()
 {
-    // Add black border around the grid to indicate screen bounds
     for (int y = 0; y < mHeight; ++y)
     {
         for (int x = 0; x < mWidth; ++x)
         {
             if (y == 0 || y == mHeight - 1 || x == 0 || x == mWidth - 1)
             {
-                mDungeonGrid[y][x] = EDungeonPiece::Empty; // Set border to Empty (black)
+                mDungeonGrid[y][x] = EDungeonPiece::Wall;
             }
         }
     }

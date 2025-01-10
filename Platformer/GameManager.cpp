@@ -43,7 +43,7 @@ GameManager::GameManager(WindowManager & windowManager)
     AddManager<ScoreManager>();
     AddManager<DropManager>();
     AddManager<TileEditor>(20, 15, 32);
-    AddManager<DungeonManager>(60, 34);
+    AddManager<DungeonManager>(120, 68);
 
     // Game Audio
     /*{
@@ -168,6 +168,7 @@ void GameManager::Update(float deltaTime)
         }
     }
 
+#if 0
     // DungeonManager
     {
         auto * pDungeonManager = GetManager<DungeonManager>();
@@ -198,29 +199,26 @@ void GameManager::Update(float deltaTime)
             }
         }
     }
+#endif
 }
 
 //------------------------------------------------------------------------------------------------------------------------
 
-void GameManager::DebugUpdate()
+void GameManager::DebugUpdate(float deltaTime)
 {
     if (!mpWindow)
     {
         return;
     }
 
-    sf::Vector2i mousePos = sf::Mouse::getPosition(*mpWindow);
-
-    float cellWidth = 32.f;
-    float cellHeight = 32.f;
-
-    int cellX = int(mousePos.x / cellWidth);
-    int cellY = int(mousePos.y / cellHeight);
-
-    if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+    // DungeonManager
     {
-        //mpTileEditor->SetTile()
-        printf("Clicked on cell %d, %d \n", cellX, cellY);
+        auto * pDungeonManager = GetManager<DungeonManager>();
+        if (pDungeonManager)
+        {
+            //pDungeonManager->GenerateDungeon();
+            pDungeonManager->DebugUpdate(deltaTime);
+        }
     }
 }
 
@@ -429,8 +427,8 @@ void GameManager::RenderDebugMode()
     if (pDungeonManager)
     {
         const auto & grid = pDungeonManager->GetDungeonGrid();
-        float cellWidth = 32.f;
-        float cellHeight = 32.f;
+        float cellWidth = 16.f;
+        float cellHeight = 16.f;
 
         for (int y = 0; y < grid.size(); ++y)
         {
