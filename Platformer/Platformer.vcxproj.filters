@@ -17,9 +17,6 @@
     <Filter Include="ExtLibs\ImGui">
       <UniqueIdentifier>{088dc731-a488-4a55-9dfb-d32595648584}</UniqueIdentifier>
     </Filter>
-    <Filter Include="DebugTileEditor">
-      <UniqueIdentifier>{67f3e0dd-d32f-48d1-b161-c7843c6aaa59}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AstroidsPrivate.cpp">
@@ -87,9 +84,6 @@
     </ClCompile>
     <ClCompile Include="SpriteComponent.cpp">
       <Filter>Components</Filter>
-    </ClCompile>
-    <ClCompile Include="TileEditor.cpp">
-      <Filter>DebugTileEditor</Filter>
     </ClCompile>
     <ClCompile Include="DungeonManager.cpp">
       <Filter>Source Files</Filter>
@@ -176,9 +170,6 @@
     </ClInclude>
     <ClInclude Include="SpriteComponent.h">
       <Filter>Components</Filter>
-    </ClInclude>
-    <ClInclude Include="TileEditor.h">
-      <Filter>DebugTileEditor</Filter>
     </ClInclude>
     <ClInclude Include="DungeonManager.h" />
   </ItemGroup>

@@ -168,7 +168,6 @@
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="ScoreManager.cpp" />
     <ClCompile Include="SpriteComponent.cpp" />
-    <ClCompile Include="TileEditor.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="WindowManager.cpp" />
   </ItemGroup>
@@ -194,7 +193,6 @@
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="ScoreManager.h" />
     <ClInclude Include="SpriteComponent.h" />
-    <ClInclude Include="TileEditor.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="WindowManager.h" />
   </ItemGroup>

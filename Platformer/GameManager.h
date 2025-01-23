@@ -9,9 +9,7 @@
 #include "BaseManager.h"
 #include "WindowManager.h"
 #include "CollisionListener.h"
-#include "TileEditor.h"
 
-class TileEditor;
 class BaseManager;
 struct ParallaxLayer
 {
@@ -79,7 +77,7 @@ private:
 
 	void InitImGui();
 	
-	void GameOver();
+	void GameOverScreen();
 
 	std::vector<std::string> GetCommonResourcePaths();
 
@@ -107,6 +105,6 @@ private:
 
 	std::vector<ParallaxLayer> mParallaxLayers;
 
-	// TileEditor
+	// Debug
 	bool mPaused;
 };

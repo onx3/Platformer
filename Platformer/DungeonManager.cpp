@@ -25,7 +25,7 @@ DungeonManager::DungeonManager(GameManager * pGameManager, int width, int height
         { EDungeonPiece::Grass, { EDungeonPiece::Sand, EDungeonPiece::Grass, EDungeonPiece::Empty} }
     };
 
-    GenerateDungeonGrid();
+    /*GenerateDungeonGrid();*/
 }
 
 //------------------------------------------------------------------------------------------------------------------------
@@ -74,7 +74,7 @@ void DungeonManager::GenerateDungeonGrid()
             {
                 mDungeonGrid[y][x] = EDungeonPiece::Water;
             }
-            else if (normalized < 0.5f && CanPlaceTile(x, y, EDungeonPiece::Sand))
+            else if (normalized < 0.42f && CanPlaceTile(x, y, EDungeonPiece::Sand))
             {
                 mDungeonGrid[y][x] = EDungeonPiece::Sand;
             }
@@ -89,6 +89,13 @@ void DungeonManager::GenerateDungeonGrid()
             }
         }
     }
+}
+
+//------------------------------------------------------------------------------------------------------------------------
+
+bool DungeonManager::IsTileWalkable(EDungeonPiece tile)
+{
+    return tile == EDungeonPiece::Grass || tile == EDungeonPiece::Sand;
 }
 
 //------------------------------------------------------------------------------------------------------------------------

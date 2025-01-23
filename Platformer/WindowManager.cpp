@@ -10,8 +10,6 @@ WindowManager::WindowManager()
     mpWindow = new sf::RenderWindow(sf::VideoMode(1920, 1088), "Astroids", sf::Style::Default);
     mpWindow->setFramerateLimit(240);
 
-    mpWindow->setMouseCursorVisible(false);
-
     ImGui::CreateContext();
     ImGuiIO & io = ImGui::GetIO();
     ImGui::SFML::Init(*mpWindow);

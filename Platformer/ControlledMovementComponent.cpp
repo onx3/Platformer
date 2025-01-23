@@ -29,6 +29,7 @@ ControlledMovementComponent::ControlledMovementComponent(GameObject * pOwner, fl
     , mMaxSpeed(300.f)
     , mVelocityX(veloX)
 	, mVelocityY(veloY)
+    , mTilt(ESpriteTilt::Normal)
 {
 }
 
@@ -58,67 +59,11 @@ void ControlledMovementComponent::Update(float deltaTime)
 
         sf::Vector2f inputDirection = { 0.f, 0.f };
 
-
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
-        {
-            inputDirection.y -= 1.f;
-            if (mTilt != ESpriteTilt::Normal)
-            {
-                std::string file = "Art/Player.png";
-                ResourceId resourceId(file);
-                auto pTexture = mpOwner->GetGameManager().GetManager<ResourceManager>()->GetTexture(resourceId);
-                if (pTexture)
-                {
-                    pSpriteComponent->SetSprite(pTexture, pSpriteComponent->GetSprite().getScale());
-                }
-                mTilt = ESpriteTilt::Normal;
-            }
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
-        {
-            inputDirection.y += 1.f;
-            if (mTilt != ESpriteTilt::Normal)
-            {
-                std::string file = "Art/Player.png";
-                ResourceId resourceId(file);
-                auto pTexture = mpOwner->GetGameManager().GetManager<ResourceManager>()->GetTexture(resourceId);
-                if (pTexture)
-                {
-                    pSpriteComponent->SetSprite(pTexture, pSpriteComponent->GetSprite().getScale());
-                }
-                mTilt = ESpriteTilt::Normal;
-            }
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
-        {
-            inputDirection.x -= 1.f;
-            if (mTilt != ESpriteTilt::Left)
-            {
-                std::string file = "Art/PlayerLeft.png";
-                ResourceId resourceId(file);
-                auto pTexture = mpOwner->GetGameManager().GetManager<ResourceManager>()->GetTexture(resourceId);
-                if (pTexture)
-                {
-                    pSpriteComponent->SetSprite(pTexture, pSpriteComponent->GetSprite().getScale());
-                }
-                mTilt = ESpriteTilt::Left;
-            }
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-        {
-            inputDirection.x += 1.f;
-            if (mTilt != ESpriteTilt::Right)
-            {
-                std::string file = "Art/PlayerRight.png";
-                ResourceId resourceId(file);
-                auto pTexture = mpOwner->GetGameManager().GetManager<ResourceManager>()->GetTexture(resourceId);
-                if (pTexture)
-                {
-                    pSpriteComponent->SetSprite(pTexture, pSpriteComponent->GetSprite().getScale());
-                }
-                mTilt = ESpriteTilt::Right;
-            }
-        }
+        // Input handling
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) inputDirection.y -= 1.f;
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) inputDirection.y += 1.f;
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) inputDirection.x -= 1.f;
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) inputDirection.x += 1.f;
 
         // Normalize input direction to prevent faster diagonal movement
         if (inputDirection.x != 0.f || inputDirection.y != 0.f)
@@ -146,10 +91,36 @@ void ControlledMovementComponent::Update(float deltaTime)
             mVelocity.y -= std::min(std::abs(mVelocity.y), mDeceleration * deltaTime) * (mVelocity.y > 0 ? 1 : -1);
         }
 
-        // Update position
-        position += mVelocity * deltaTime;
+        // Calculate new position
+        sf::Vector2f newPosition = position + mVelocity * deltaTime;
 
-        // Boundary checking
+        // Get grid and tile size
+        auto & gameManager = GetGameObject().GetGameManager();
+        auto pDungeonManager = gameManager.GetManager<DungeonManager>();
+        float cellWidth = 16.0f;  // Example tile width
+        float cellHeight = 16.0f; // Example tile height
+
+        if (pDungeonManager)
+        {
+            const auto & grid = pDungeonManager->GetDungeonGrid();
+
+            // Determine the tile under the new position
+            int tileX = static_cast<int>(newPosition.x / cellWidth);
+            int tileY = static_cast<int>(newPosition.y / cellHeight);
+
+            if (tileX >= 0 && tileX < grid[0].size() && tileY >= 0 && tileY < grid.size())
+            {
+                EDungeonPiece tile = grid[tileY][tileX];
+
+                // Update position only if the tile is walkable
+                if (pDungeonManager->IsTileWalkable(tile))
+                {
+                    position = newPosition;
+                }
+            }
+        }
+
+        // Boundary checking (if tile-based movement allows going to edges)
         float halfWidth = size.x / 2.0f;
         float halfHeight = size.y / 2.0f;
 
@@ -159,7 +130,7 @@ void ControlledMovementComponent::Update(float deltaTime)
         pSpriteComponent->SetPosition(position);
 
         // Rotate sprite towards mouse
-        sf::RenderWindow * pWindow = GetGameObject().GetGameManager().mpWindow;
+        sf::RenderWindow * pWindow = gameManager.mpWindow;
         sf::Vector2i mousePosition = sf::Mouse::getPosition(*pWindow);
 
         sf::Vector2f direction = sf::Vector2f(mousePosition) - position;

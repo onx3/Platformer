@@ -2,6 +2,8 @@
 
 #include "AstroidsPrivate.h"
 #include "GameComponent.h"
+#include "DungeonManager.h"
+
 enum class ESpriteTilt
 {
 	Normal,

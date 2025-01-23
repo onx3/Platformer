@@ -12,7 +12,6 @@
 #include "PlayerManager.h"
 #include "DropManager.h"
 #include "ResourceManager.h"
-#include "TileEditor.h"
 #include "DungeonManager.h"
 
 GameManager::GameManager(WindowManager & windowManager)
@@ -42,8 +41,7 @@ GameManager::GameManager(WindowManager & windowManager)
     AddManager<EnemyAIManager>();
     AddManager<ScoreManager>();
     AddManager<DropManager>();
-    AddManager<TileEditor>(20, 15, 32);
-    AddManager<DungeonManager>(120, 68);
+    AddManager<DungeonManager>(mpWindow->getSize().x / 16, mpWindow->getSize().y / 16);
 
     // Game Audio
     /*{
@@ -83,10 +81,13 @@ GameManager::GameManager(WindowManager & windowManager)
         pResourceManager->PreloadResources(resourcesToLoad);
     }
 
-    // TileEditorManager
+    // DungeonManager
     {
-        auto * pTileEditor = GetManager<TileEditor>();
-        pTileEditor->Initalize();
+        auto * pDungeonManager = GetManager<DungeonManager>();
+        if (pDungeonManager)
+        {
+            pDungeonManager->GenerateDungeonGrid();
+        }
     }
 }
 
@@ -136,7 +137,7 @@ void GameManager::EndGame()
     }
 
     mPhysicsWorld.ClearForces();
-    GameOver();
+    GameOverScreen();
 }
 
 //------------------------------------------------------------------------------------------------------------------------
@@ -216,7 +217,10 @@ void GameManager::DebugUpdate(float deltaTime)
         auto * pDungeonManager = GetManager<DungeonManager>();
         if (pDungeonManager)
         {
-            //pDungeonManager->GenerateDungeon();
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::H))
+            {
+                pDungeonManager->GenerateDungeonGrid();
+            }
         }
     }
 }
@@ -363,7 +367,42 @@ void GameManager::Render(float deltaTime)
     }
     else
     {
-        mpWindow->setMouseCursorVisible(mShowImGuiWindow);
+        // Render Dungeon
+        {
+            auto * pDungeonManager = GetManager<DungeonManager>();
+            if (pDungeonManager)
+            {
+                const auto & grid = pDungeonManager->GetDungeonGrid();
+                float cellWidth = 16.f;
+                float cellHeight = 16.f;
+
+                for (int y = 0; y < grid.size(); ++y)
+                {
+                    for (int x = 0; x < grid[y].size(); ++x)
+                    {
+                        sf::RectangleShape rect(sf::Vector2f(cellWidth, cellHeight));
+                        rect.setPosition(x * cellWidth, y * cellHeight);
+                        switch (grid[y][x])
+                        {
+                            case EDungeonPiece::Grass:
+                                rect.setFillColor(sf::Color::Green);
+                                break;
+                            case EDungeonPiece::Water:
+                                rect.setFillColor(sf::Color::Blue);
+                                break;
+                            case EDungeonPiece::Sand:
+                                rect.setFillColor(sf::Color::Yellow);
+                                break;
+                            case EDungeonPiece::Empty:
+                                rect.setFillColor(sf::Color::Black);
+                                break;
+                        }
+
+                        mpWindow->draw(rect);
+                    }
+                }
+            }
+        }
 
         if (mpRootGameObject)
         {
@@ -385,20 +424,13 @@ void GameManager::Render(float deltaTime)
             sf::Vector2i mousePosition = sf::Mouse::getPosition(*mpWindow);
             mCursorSprite.setPosition(float(mousePosition.x), float(mousePosition.y));
             mpWindow->draw(mCursorSprite);
-        }
+        }        
     }
 
     // ImGui && Debug mode
     {
         int imGuiTime = int(std::max(deltaTime, 0.0001f));
         ImGui::SFML::Update(*mpWindow, sf::milliseconds(1));
-
-        // Acts as a debug mode
-        if (mPaused)
-        {
-            mpWindow->setMouseCursorVisible(true);
-            RenderDebugMode();
-        }
         
         RenderImGui();
 
@@ -413,15 +445,6 @@ void GameManager::Render(float deltaTime)
 
 void GameManager::RenderDebugMode()
 {
-#if 0
-    DrawGrid(32.f, 32.f);
-    auto * pTileEditor = GetManager<TileEditor>();
-    if (pTileEditor)
-    {
-        pTileEditor->RenderEditor();
-    }
-#endif
-
     auto * pDungeonManager = GetManager<DungeonManager>();
     if (pDungeonManager)
     {
@@ -556,8 +579,6 @@ void GameManager::InitWindow()
         localBounds.width / 2.0f,
         localBounds.height / 2.0f
     );
-
-    mpWindow->setMouseCursorVisible(false);
 }
 
 //------------------------------------------------------------------------------------------------------------------------
@@ -579,7 +600,7 @@ void GameManager::InitImGui()
 
 //------------------------------------------------------------------------------------------------------------------------
 
-void GameManager::GameOver()
+void GameManager::GameOverScreen()
 {
     mIsGameOver = true;
 

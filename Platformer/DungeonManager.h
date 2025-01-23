@@ -4,7 +4,7 @@
 #include <string>
 #include "BaseManager.h"
 
-enum class EDungeonPiece
+enum class EDungeonPiece : unsigned char
 {
     Empty,
     Water,
@@ -22,8 +22,11 @@ public:
 
     void Update(float deltaTime) override;
 
-private:
     void GenerateDungeonGrid();
+
+    bool IsTileWalkable(EDungeonPiece tile);
+
+private:
     bool CanPlaceTile(int x, int y, EDungeonPiece type) const;
 
     // Perlin Noise Helpers
