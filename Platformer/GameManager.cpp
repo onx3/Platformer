@@ -13,6 +13,8 @@
 #include "DropManager.h"
 #include "ResourceManager.h"
 #include "DungeonManager.h"
+#include "CameraManager.h"
+#include "BaseManager.h"
 
 GameManager::GameManager(WindowManager & windowManager)
     : mWindowManager(windowManager)
@@ -37,6 +39,7 @@ GameManager::GameManager(WindowManager & windowManager)
     InitImGui();
     mpRootGameObject = new GameObject(this, ETeam::Neutral);
 
+    AddManager<CameraManager>();
     AddManager<PlayerManager>();
     AddManager<EnemyAIManager>();
     AddManager<ScoreManager>();

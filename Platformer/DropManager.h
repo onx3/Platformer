@@ -9,6 +9,7 @@ enum class EDropType
 	LifePickup
 };
 
+class BaseManager;
 class DropManager : public BaseManager
 {
 public:

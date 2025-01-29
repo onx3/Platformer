@@ -8,6 +8,7 @@
 #include "ExplosionComponent.h"
 #include <cassert>
 #include "ResourceManager.h"
+#include "CameraManager.h"
 
 static int sPlayerHealth = 100;
 
@@ -103,6 +104,15 @@ void PlayerManager::InitPlayer()
                 pPlayer->GetSize(),
                 true
             ));
+        }
+    }
+
+    // CameraManager
+    {
+        auto * pCameraManager = mpGameManager->GetManager<CameraManager>();
+        if (pCameraManager)
+        {
+            pCameraManager->SetTarget(pPlayer);
         }
     }
 }
