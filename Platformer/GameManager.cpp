@@ -41,7 +41,7 @@ GameManager::GameManager(WindowManager & windowManager)
     AddManager<EnemyAIManager>();
     AddManager<ScoreManager>();
     AddManager<DropManager>();
-    AddManager<DungeonManager>(mpWindow->getSize().x / 16, mpWindow->getSize().y / 16);
+    AddManager<DungeonManager>(20, int(mpWindow->getSize().x / gsPixelCount), int(mpWindow->getSize().y / gsPixelCount), 20, 35);
 
     // Game Audio
     /*{
@@ -86,7 +86,7 @@ GameManager::GameManager(WindowManager & windowManager)
         auto * pDungeonManager = GetManager<DungeonManager>();
         if (pDungeonManager)
         {
-            pDungeonManager->GenerateDungeonGrid();
+            //pDungeonManager->GenerateDungeonGrid();
         }
     }
 }
@@ -168,39 +168,6 @@ void GameManager::Update(float deltaTime)
             manager.second->Update(deltaTime);
         }
     }
-
-#if 0
-    // DungeonManager
-    {
-        auto * pDungeonManager = GetManager<DungeonManager>();
-        if (pDungeonManager)
-        {
-            pDungeonManager->GenerateDungeon();
-            const auto & grid = pDungeonManager->GetDungeonGrid();
-
-            // Convert the grid into GameObjects
-            for (int y = 0; y < grid.size(); ++y)
-            {
-                for (int x = 0; x < grid[y].size(); ++x)
-                {
-                    EDungeonPiece piece = grid[y][x];
-                    switch (piece)
-                    {
-                        case EDungeonPiece::Grass:
-                            //CreateNewGameObject(ETeam::Neutral, mpRootGameObject)->AddComponent<FloorComponent>();
-                            break;
-                        case EDungeonPiece::Wall:
-                            //CreateNewGameObject(ETeam::Neutral, mpRootGameObject)->AddComponent<WallComponent>();
-                            break;
-                        case EDungeonPiece::Empty:
-                            // Do nothing for empty tiles
-                            break;
-                    }
-                }
-            }
-        }
-    }
-#endif
 }
 
 //------------------------------------------------------------------------------------------------------------------------
@@ -219,7 +186,7 @@ void GameManager::DebugUpdate(float deltaTime)
         {
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::H))
             {
-                pDungeonManager->GenerateDungeonGrid();
+                //pDungeonManager->GenerateDungeonGrid();
             }
         }
     }
@@ -245,7 +212,9 @@ void GameManager::UpdateGameObjects(float deltaTime)
 void GameManager::CleanUpDestroyedGameObjects(GameObject * pRoot)
 {
     if (!pRoot)
+    {
         return;
+    }
 
     auto & children = pRoot->GetChildren();
     std::vector<GameObject *> objectsToDelete;
@@ -367,14 +336,16 @@ void GameManager::Render(float deltaTime)
     }
     else
     {
+        mpWindow->setMouseCursorVisible(mShowImGuiWindow);
+
         // Render Dungeon
         {
             auto * pDungeonManager = GetManager<DungeonManager>();
             if (pDungeonManager)
             {
                 const auto & grid = pDungeonManager->GetDungeonGrid();
-                float cellWidth = 16.f;
-                float cellHeight = 16.f;
+                float cellWidth = gsPixelCount;
+                float cellHeight = gsPixelCount;
 
                 for (int y = 0; y < grid.size(); ++y)
                 {
@@ -384,13 +355,13 @@ void GameManager::Render(float deltaTime)
                         rect.setPosition(x * cellWidth, y * cellHeight);
                         switch (grid[y][x])
                         {
-                            case EDungeonPiece::Grass:
-                                rect.setFillColor(sf::Color::Green);
+                            case EDungeonPiece::Brick:
+                                rect.setFillColor(sf::Color(128, 128, 128));
                                 break;
                             case EDungeonPiece::Water:
                                 rect.setFillColor(sf::Color::Blue);
                                 break;
-                            case EDungeonPiece::Sand:
+                            case EDungeonPiece::Path:
                                 rect.setFillColor(sf::Color::Yellow);
                                 break;
                             case EDungeonPiece::Empty:
@@ -431,7 +402,7 @@ void GameManager::Render(float deltaTime)
     {
         int imGuiTime = int(std::max(deltaTime, 0.0001f));
         ImGui::SFML::Update(*mpWindow, sf::milliseconds(1));
-        
+
         RenderImGui();
 
         // Render ImGui draw data
@@ -439,46 +410,6 @@ void GameManager::Render(float deltaTime)
     }
 
     mpWindow->display();
-}
-
-//------------------------------------------------------------------------------------------------------------------------
-
-void GameManager::RenderDebugMode()
-{
-    auto * pDungeonManager = GetManager<DungeonManager>();
-    if (pDungeonManager)
-    {
-        const auto & grid = pDungeonManager->GetDungeonGrid();
-        float cellWidth = 16.f;
-        float cellHeight = 16.f;
-
-        for (int y = 0; y < grid.size(); ++y)
-        {
-            for (int x = 0; x < grid[y].size(); ++x)
-            {
-                sf::RectangleShape rect(sf::Vector2f(cellWidth, cellHeight));
-                rect.setPosition(x * cellWidth, y * cellHeight);
-
-                switch (grid[y][x])
-                {
-                    case EDungeonPiece::Grass:
-                        rect.setFillColor(sf::Color::Green);
-                        break;
-                    case EDungeonPiece::Water:
-                        rect.setFillColor(sf::Color::Blue);
-                        break;
-                    case EDungeonPiece::Sand:
-                        rect.setFillColor(sf::Color::Yellow);
-                        break;
-                    case EDungeonPiece::Empty:
-                        rect.setFillColor(sf::Color::Black);
-                        break;
-                }
-
-                mpWindow->draw(rect);
-            }
-        }
-    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------
@@ -579,6 +510,7 @@ void GameManager::InitWindow()
         localBounds.width / 2.0f,
         localBounds.height / 2.0f
     );
+    mpWindow->setMouseCursorVisible(false);
 }
 
 //------------------------------------------------------------------------------------------------------------------------

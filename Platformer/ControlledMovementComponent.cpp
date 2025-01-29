@@ -113,7 +113,7 @@ void ControlledMovementComponent::Update(float deltaTime)
                 EDungeonPiece tile = grid[tileY][tileX];
 
                 // Update position only if the tile is walkable
-                if (pDungeonManager->IsTileWalkable(tile))
+                //if (pDungeonManager->IsTileWalkable(tile))
                 {
                     position = newPosition;
                 }

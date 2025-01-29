@@ -35,8 +35,6 @@ public:
 
 	void Render(float deltaTime);
 
-	void RenderDebugMode();
-
 	template <typename T>
 	void AddManager();
 	template <typename T, typename... Args>

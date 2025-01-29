@@ -9,17 +9,21 @@
     ],
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
+        "Dungeon.tsx": {
+            "scaleInDock": 2,
+            "scaleInEditor": 3
+        },
         "Player.tsx": {
             "dynamicWrapping": true,
             "scaleInDock": 1,
             "scaleInEditor": 11
         },
         "Testing.tmx": {
-            "scale": 1.7535416666666668,
+            "scale": 4,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 480.1710823333729,
-                "y": 319.9239634073898
+                "x": 137.25,
+                "y": 99
             }
         },
         "Tiles.tsx": {
@@ -28,18 +32,23 @@
             "scaleInEditor": 1
         }
     },
-    "last.imagePath": "D:/Platformer/Platformer/Art/Tiled",
+    "last.imagePath": "C:/Users/leasi/Downloads/kenney_roguelike-caves-dungeons/Spritesheet",
     "map.lastUsedFormat": "tmx",
     "openFiles": [
         "Testing.tmx",
-        "Tiles.tsx"
+        "Dungeon.tsx"
     ],
     "project": "Platformer.tiled-project",
     "recentFiles": [
-        "Tiles.tsx",
+        "Dungeon.tsx",
         "Testing.tmx",
+        "Tiles.tsx",
         "Player.tsx"
     ],
     "tileset.lastUsedFormat": "tsx",
+    "tileset.tileSize": {
+        "height": 17,
+        "width": 17
+    },
     "tileset.type": 0
 }
