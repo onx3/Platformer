@@ -1,5 +1,4 @@
 #pragma once
-#include "AstroidsPrivate.h"
 #include <iostream>
 #include <vector>
 #include "box2d/box2d.h"
@@ -61,12 +60,14 @@ public:
 
 	void SetPausedState(bool pause);
 
+	sf::RenderWindow & GetWindow();
+
 	// Window
 	WindowManager & mWindowManager;
-	sf::RenderWindow * mpWindow;
 	sf::Event mEvent;
 
 private:
+
 	void CleanUpDestroyedGameObjects(GameObject * pRoot);
 
 	void RenderImGui();
@@ -83,7 +84,6 @@ private:
 
 	bool mShowImGuiWindow;
 	std::unordered_map<std::type_index, BaseManager *> mManagers;
-	sf::Sprite mCursorSprite;
 	GameObject * mpRootGameObject;
 
 	// Audio
@@ -105,4 +105,6 @@ private:
 
 	// Debug
 	bool mPaused;
+
+	sf::RenderWindow * mpWindow;
 };

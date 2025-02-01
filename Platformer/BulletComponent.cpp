@@ -1,50 +1,63 @@
 #include "AstroidsPrivate.h"
-#include "GameComponent.h"
-#include "imgui.h"
-#include "BDConfig.h"
+#include "BulletComponent.h"
+#include "CollisionComponent.h"
 
-GameComponent::GameComponent(GameObject * pOwner)
-    : mpOwner(pOwner)
-    , mName("GameComponent")
-{
-}
-
-//------------------------------------------------------------------------------------------------------------------------
-
-void GameComponent::SetOwner(GameObject * pOwner)
-{
-    mpOwner = pOwner;
-}
-
-//------------------------------------------------------------------------------------------------------------------------
-
-GameObject & GameComponent::GetGameObject() const
-{
-    assert(mpOwner && "mpOwner is nullptr!");
-    return *mpOwner;
-}
-
-//------------------------------------------------------------------------------------------------------------------------
-
-void GameComponent::draw(sf::RenderTarget & target, sf::RenderStates states)
+BulletComponent::BulletComponent(GameObject * pOwner, float speed, float lifetime)
+	: GameComponent(pOwner)
+	, mSpeed(speed)
+	, mLifetime(lifetime)
+	, mName("Bulletcompnent")
 {
 
 }
 
 //------------------------------------------------------------------------------------------------------------------------
 
-void GameComponent::DebugImGuiComponentInfo()
+void BulletComponent::Update(float deltaTime)
 {
-#if IMGUI_ENABLED()
+    if (!mpOwner->IsActive()) return;
 
-#endif
+    mLifetime -= deltaTime;
+    if (mLifetime <= 0)
+    {
+        mpOwner->Deactivate();
+        return;
+    }
+
+    auto pCollisionComp = mpOwner->GetComponent<CollisionComponent>().lock();
+    if (pCollisionComp)
+    {
+        auto newPos = mpOwner->GetPosition() + (mVelocity * mSpeed * deltaTime);
+        mpOwner->SetPosition(newPos);
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------
 
-std::string & GameComponent::GetClassName()
+void BulletComponent::draw(sf::RenderTarget & target, sf::RenderStates states)
 {
-    return mName;
+	
+}
+
+//------------------------------------------------------------------------------------------------------------------------
+
+void BulletComponent::DebugImGuiComponentInfo()
+{
+
+}
+
+//------------------------------------------------------------------------------------------------------------------------
+
+std::string & BulletComponent::GetClassName()
+{
+	return mName;
+}
+
+//------------------------------------------------------------------------------------------------------------------------
+
+void BulletComponent::SetVelocity(sf::Vector2f dir)
+{
+	mVelocity = dir;
 }
 
 //------------------------------------------------------------------------------------------------------------------------

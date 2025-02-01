@@ -1,5 +1,4 @@
 #pragma once
-#include "AstroidsPrivate.h"
 #include "BaseManager.h"
 #include <string>
 #include <functional>

@@ -1,5 +1,4 @@
 #pragma once
-#include "AstroidsPrivate.h"
 #include "BaseManager.h"
 
 class PlayerManager : public BaseManager
@@ -10,9 +9,8 @@ public:
 
     void InitPlayer();
 
-    void Update(float deltaTime) override;
-
-    void OnGameEnd() override;
+    virtual void Update(float deltaTime) override;
+    virtual void OnGameEnd() override;
 
     void OnPlayerLostLife(GameObject * pPlayer);
 

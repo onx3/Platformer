@@ -1,7 +1,5 @@
 #pragma once
 
-#include "AstroidsPrivate.h"
-
 class GameObject;
 class GameManager;
 
@@ -16,9 +14,7 @@ public:
     GameObject & GetGameObject() const;
 
     virtual void Update(float deltaTime) = 0;
-
     virtual void draw(sf::RenderTarget & target, sf::RenderStates states);
-
     virtual void DebugImGuiComponentInfo();
 
     virtual std::string & GetClassName();

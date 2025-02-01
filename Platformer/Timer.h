@@ -1,5 +1,4 @@
 #pragma once
-#include "AstroidsPrivate.h"
 typedef unsigned long long uint64;
 typedef long long int64;
 typedef double float64;

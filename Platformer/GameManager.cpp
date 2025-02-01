@@ -15,6 +15,7 @@
 #include "DungeonManager.h"
 #include "CameraManager.h"
 #include "BaseManager.h"
+#include "LevelManager.h"
 
 GameManager::GameManager(WindowManager & windowManager)
     : mWindowManager(windowManager)
@@ -23,7 +24,6 @@ GameManager::GameManager(WindowManager & windowManager)
     , mShowImGuiWindow(false)
     , mpRootGameObject(nullptr)
     , mManagers()
-    , mCursorSprite()
     , mSoundPlayed(false)
     , mIsGameOver(false)
     , mPhysicsWorld(b2Vec2(0.0f, 0.f))
@@ -40,19 +40,17 @@ GameManager::GameManager(WindowManager & windowManager)
     mpRootGameObject = new GameObject(this, ETeam::Neutral);
 
     AddManager<CameraManager>();
+
+    //Level Manager
+    {
+        AddManager<LevelManager>();
+        //GetManager<LevelManager>()->LoadLevel("Levels/Level1.json");
+    }
+
     AddManager<PlayerManager>();
     AddManager<EnemyAIManager>();
     AddManager<ScoreManager>();
     AddManager<DropManager>();
-    AddManager<DungeonManager>(20, int(mpWindow->getSize().x / gsPixelCount), int(mpWindow->getSize().y / gsPixelCount), 20, 35);
-
-    // Game Audio
-    /*{
-        assert(mSoundBuffer.loadFromFile("Audio/ThroughSpace.ogg"));
-        mSound.setBuffer(mSoundBuffer);
-        mSound.setVolume(25.f);
-        mSound.setLoop(true);
-    }*/
 
     // End Game
     {
@@ -82,15 +80,6 @@ GameManager::GameManager(WindowManager & windowManager)
         auto * pResourceManager = GetManager<ResourceManager>();
         auto resourcesToLoad = GetCommonResourcePaths();
         pResourceManager->PreloadResources(resourcesToLoad);
-    }
-
-    // DungeonManager
-    {
-        auto * pDungeonManager = GetManager<DungeonManager>();
-        if (pDungeonManager)
-        {
-            //pDungeonManager->GenerateDungeonGrid();
-        }
     }
 }
 
@@ -341,64 +330,15 @@ void GameManager::Render(float deltaTime)
     {
         mpWindow->setMouseCursorVisible(mShowImGuiWindow);
 
-        // Render Dungeon
-        {
-            auto * pDungeonManager = GetManager<DungeonManager>();
-            if (pDungeonManager)
-            {
-                const auto & grid = pDungeonManager->GetDungeonGrid();
-                float cellWidth = gsPixelCount;
-                float cellHeight = gsPixelCount;
-
-                for (int y = 0; y < grid.size(); ++y)
-                {
-                    for (int x = 0; x < grid[y].size(); ++x)
-                    {
-                        sf::RectangleShape rect(sf::Vector2f(cellWidth, cellHeight));
-                        rect.setPosition(x * cellWidth, y * cellHeight);
-                        switch (grid[y][x])
-                        {
-                            case EDungeonPiece::Brick:
-                                rect.setFillColor(sf::Color(128, 128, 128));
-                                break;
-                            case EDungeonPiece::Water:
-                                rect.setFillColor(sf::Color::Blue);
-                                break;
-                            case EDungeonPiece::Path:
-                                rect.setFillColor(sf::Color::Yellow);
-                                break;
-                            case EDungeonPiece::Empty:
-                                rect.setFillColor(sf::Color::Black);
-                                break;
-                        }
-
-                        mpWindow->draw(rect);
-                    }
-                }
-            }
-        }
-
         if (mpRootGameObject)
         {
             mpWindow->draw(*mpRootGameObject);
         }
 
-        auto * pScoreManager = GetManager<ScoreManager>();
-        if (pScoreManager)
+        for (auto pManager : mManagers)
         {
-            mpWindow->draw(pScoreManager->GetScoreText());
-            for (auto & life : pScoreManager->GetSpriteLives())
-            {
-                mpWindow->draw(life);
-            }
+            pManager.second->Render(*mpWindow);
         }
-
-        if (!mPaused)
-        {
-            sf::Vector2i mousePosition = sf::Mouse::getPosition(*mpWindow);
-            mCursorSprite.setPosition(float(mousePosition.x), float(mousePosition.y));
-            mpWindow->draw(mCursorSprite);
-        }        
     }
 
     // ImGui && Debug mode
@@ -501,18 +441,16 @@ void GameManager::SetPausedState(bool pause)
 
 //------------------------------------------------------------------------------------------------------------------------
 
+sf::RenderWindow & GameManager::GetWindow()
+{
+    assert(mpWindow && "mpWindow is nullptr!");
+    return *mpWindow;
+}
+
+//------------------------------------------------------------------------------------------------------------------------
+
 void GameManager::InitWindow()
 {
-    ResourceId resourceId("Art/Crosshair.png");
-    auto pTexture = GetManager<ResourceManager>()->GetTexture(resourceId);
-    mCursorSprite.setTexture(*pTexture);
-    mCursorSprite.setScale(.25f, .25f);
-
-    sf::FloatRect localBounds = mCursorSprite.getLocalBounds();
-    mCursorSprite.setOrigin(
-        localBounds.width / 2.0f,
-        localBounds.height / 2.0f
-    );
     mpWindow->setMouseCursorVisible(false);
 }
 

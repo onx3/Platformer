@@ -6,9 +6,9 @@ class DropMovementComponent : public GameComponent
 public:
 	DropMovementComponent(GameObject * pGameOwner);
 
-	void Update(float deltaTime);
-	void DebugImGuiComponentInfo() override;
-	std::string & GetClassName() override;
+	virtual void Update(float deltaTime) override;
+	virtual void DebugImGuiComponentInfo() override;
+	virtual std::string & GetClassName() override;
 
 private:
 	sf::Vector2f mDirection;

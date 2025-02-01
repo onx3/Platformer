@@ -1,5 +1,5 @@
 #pragma once
-#include "AstroidsPrivate.h"
+#include "SFML/Graphics.hpp"
 #include <unordered_map>
 #include <typeindex>
 #include <memory>
@@ -83,7 +83,8 @@ public:
 
     std::vector<GameComponent *> GetAllComponents();
 
-    void SetActiveState(bool active);
+    void Activate();
+    void Deactivate();
     bool IsActive();
 
     void DebugImGuiInfo();
@@ -102,7 +103,7 @@ protected:
 
 private:
     bool mIsDestroyed; // Used to know when GameManager can Delete
-    bool mIsActive; // Used to know when the GameObject is dying
+    bool mActive; // Used to know when the GameObject is dying
     GameManager * mpGameManager;
     ETeam mTeam;
     std::vector<GameObject *> mChildGameObjects;

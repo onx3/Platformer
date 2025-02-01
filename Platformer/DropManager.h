@@ -9,15 +9,13 @@ enum class EDropType
 	LifePickup
 };
 
-class BaseManager;
 class DropManager : public BaseManager
 {
 public:
 	DropManager(GameManager * pGameManager);
 
-	void Update(float deltaTime) override;
-
-	void OnGameEnd() override;
+	virtual void Update(float deltaTime) override;
+	virtual void OnGameEnd() override;
 
 	void CleanUpDrops();
 

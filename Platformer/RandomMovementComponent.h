@@ -1,5 +1,4 @@
 #pragma once
-#include "AstroidsPrivate.h"
 #include "GameComponent.h"
 
 class RandomMovementComponent : public GameComponent
@@ -8,10 +7,8 @@ public:
     RandomMovementComponent(GameObject * pOwner);
     virtual ~RandomMovementComponent();
 
-    void Update(float deltaTime) override;
-
+    virtual void Update(float deltaTime) override;
     virtual void DebugImGuiComponentInfo() override;
-
     virtual std::string & GetClassName() override;
 
 private:

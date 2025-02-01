@@ -128,7 +128,7 @@ void HealthComponent::Update(float deltaTime)
     {
         if (mLifeCount <= 1)
         {
-            mpOwner->SetActiveState(false);
+            mpOwner->Deactivate();
         }
         else
         {

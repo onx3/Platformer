@@ -107,6 +107,15 @@
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="CameraManager.cpp">
+      <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="BulletComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="BulletPoolManager.cpp">
+      <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="LevelManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -180,6 +189,15 @@
     <ClInclude Include="BDConfig.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="CameraManager.h" />
+    <ClInclude Include="CameraManager.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="BulletComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="BulletPoolManager.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="LevelManager.h" />
   </ItemGroup>
 </Project>

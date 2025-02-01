@@ -45,7 +45,7 @@ void PlayerManager::InitPlayer()
 
     // Sprite Component
     {
-        sf::Vector2u windowSize = mpGameManager->mpWindow->getSize();
+        sf::Vector2u windowSize = mpGameManager->GetWindow().getSize();
         sf::Vector2f centerPosition(float(windowSize.x) / 2.0f, float(windowSize.y) / 2.0f);
 
         auto pSpriteComponent = pPlayer->GetComponent<SpriteComponent>().lock();

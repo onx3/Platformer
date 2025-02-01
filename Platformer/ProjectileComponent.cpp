@@ -80,7 +80,7 @@ void ProjectileComponent::Shoot()
 		sf::Vector2f spawnPosition = playerPosition + offset;
 
 		// Get mouse position relative to the window
-		sf::Vector2i mousePos = sf::Mouse::getPosition(*GetGameObject().GetGameManager().mpWindow);
+		sf::Vector2i mousePos = sf::Mouse::getPosition(GetGameObject().GetGameManager().GetWindow());
 		sf::Vector2f mousePosition(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
 
 		// Calculate direction vector
