@@ -5,6 +5,7 @@
 #include "SpriteComponent.h"
 #include "BDConfig.h"
 #include "ResourceManager.h"
+#include "CameraManager.h"
 
 ControlledMovementComponent::ControlledMovementComponent(GameObject * pOwner)
     : GameComponent(pOwner)
@@ -55,7 +56,7 @@ void ControlledMovementComponent::Update(float deltaTime)
         // Get current position, size, and window bounds
         auto position = pSpriteComponent->GetPosition();
         sf::Vector2f size(pSpriteComponent->GetWidth(), pSpriteComponent->GetHeight());
-        sf::Vector2u windowSize = GetGameObject().GetGameManager().mpWindow->getSize();
+        sf::Vector2u windowSize = GetGameObject().GetGameManager().GetWindow().getSize();
 
         sf::Vector2f inputDirection = { 0.f, 0.f };
 
@@ -113,7 +114,7 @@ void ControlledMovementComponent::Update(float deltaTime)
                 EDungeonPiece tile = grid[tileY][tileX];
 
                 // Update position only if the tile is walkable
-                if (pDungeonManager->IsTileWalkable(tile))
+                //if (pDungeonManager->IsTileWalkable(tile))
                 {
                     position = newPosition;
                 }
@@ -130,10 +131,11 @@ void ControlledMovementComponent::Update(float deltaTime)
         pSpriteComponent->SetPosition(position);
 
         // Rotate sprite towards mouse
-        sf::RenderWindow * pWindow = gameManager.mpWindow;
-        sf::Vector2i mousePosition = sf::Mouse::getPosition(*pWindow);
+        sf::RenderWindow & window = gameManager.GetWindow();
+        sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
 
-        sf::Vector2f direction = sf::Vector2f(mousePosition) - position;
+        auto crosshairPosition = GetGameObject().GetGameManager().GetManager<CameraManager>()->GetCrosshairPosition();
+        sf::Vector2f direction = crosshairPosition - position;
         float angle = std::atan2(direction.y, direction.x) * 180.f / 3.14159f;
         pSpriteComponent->SetRotation(angle + 90.f);
     }

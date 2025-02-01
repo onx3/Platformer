@@ -11,7 +11,7 @@
 GameObject::GameObject(GameManager * pGameManager, ETeam team, GameObject * pParent)
     : mpGameManager(pGameManager)
     , mIsDestroyed(false)
-    , mIsActive(true)
+    , mActive(true)
     , mTeam(team)
     , mChildGameObjects()
     , mpParent(pParent)
@@ -234,6 +234,7 @@ sf::Vector2f GameObject::GetSize() const
 
 GameManager & GameObject::GetGameManager() const
 {
+    assert(mpGameManager && "mpGameManager is nullptr!");
     return *mpGameManager;
 }
 
@@ -313,16 +314,23 @@ std::vector<GameComponent *> GameObject::GetAllComponents()
 
 //------------------------------------------------------------------------------------------------------------------------
 
-void GameObject::SetActiveState(bool active)
+void GameObject::Activate()
 {
-    mIsActive = active;
+    mActive = true;
+}
+
+//------------------------------------------------------------------------------------------------------------------------
+
+void GameObject::Deactivate()
+{
+    mActive = false;
 }
 
 //------------------------------------------------------------------------------------------------------------------------
 
 bool GameObject::IsActive()
 {
-    return mIsActive;
+    return mActive;
 }
 
 //------------------------------------------------------------------------------------------------------------------------

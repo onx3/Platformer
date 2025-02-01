@@ -1,6 +1,5 @@
 #pragma once
 
-#include "AstroidsPrivate.h"
 #include "GameComponent.h"
 
 class SpriteComponent : public GameComponent

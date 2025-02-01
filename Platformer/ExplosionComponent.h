@@ -1,5 +1,4 @@
 #pragma once
-#include "AstroidsPrivate.h"
 #include "GameComponent.h"
 #include "string"
 #include "GameObject.h"

@@ -1,5 +1,6 @@
 #pragma once
-#include "AstroidsPrivate.h"
+
+static float gsPixelCount = 16;
 
 class WindowManager
 {

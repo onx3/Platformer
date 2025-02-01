@@ -13,6 +13,9 @@
 #include "DropManager.h"
 #include "ResourceManager.h"
 #include "DungeonManager.h"
+#include "CameraManager.h"
+#include "BaseManager.h"
+#include "LevelManager.h"
 
 GameManager::GameManager(WindowManager & windowManager)
     : mWindowManager(windowManager)
@@ -21,7 +24,6 @@ GameManager::GameManager(WindowManager & windowManager)
     , mShowImGuiWindow(false)
     , mpRootGameObject(nullptr)
     , mManagers()
-    , mCursorSprite()
     , mSoundPlayed(false)
     , mIsGameOver(false)
     , mPhysicsWorld(b2Vec2(0.0f, 0.f))
@@ -37,19 +39,18 @@ GameManager::GameManager(WindowManager & windowManager)
     InitImGui();
     mpRootGameObject = new GameObject(this, ETeam::Neutral);
 
+    AddManager<CameraManager>();
+
+    //Level Manager
+    {
+        AddManager<LevelManager>();
+        //GetManager<LevelManager>()->LoadLevel("Levels/Level1.json");
+    }
+
     AddManager<PlayerManager>();
     AddManager<EnemyAIManager>();
     AddManager<ScoreManager>();
     AddManager<DropManager>();
-    AddManager<DungeonManager>(mpWindow->getSize().x / 16, mpWindow->getSize().y / 16);
-
-    // Game Audio
-    /*{
-        assert(mSoundBuffer.loadFromFile("Audio/ThroughSpace.ogg"));
-        mSound.setBuffer(mSoundBuffer);
-        mSound.setVolume(25.f);
-        mSound.setLoop(true);
-    }*/
 
     // End Game
     {
@@ -79,15 +80,6 @@ GameManager::GameManager(WindowManager & windowManager)
         auto * pResourceManager = GetManager<ResourceManager>();
         auto resourcesToLoad = GetCommonResourcePaths();
         pResourceManager->PreloadResources(resourcesToLoad);
-    }
-
-    // DungeonManager
-    {
-        auto * pDungeonManager = GetManager<DungeonManager>();
-        if (pDungeonManager)
-        {
-            pDungeonManager->GenerateDungeonGrid();
-        }
     }
 }
 
@@ -168,39 +160,6 @@ void GameManager::Update(float deltaTime)
             manager.second->Update(deltaTime);
         }
     }
-
-#if 0
-    // DungeonManager
-    {
-        auto * pDungeonManager = GetManager<DungeonManager>();
-        if (pDungeonManager)
-        {
-            pDungeonManager->GenerateDungeon();
-            const auto & grid = pDungeonManager->GetDungeonGrid();
-
-            // Convert the grid into GameObjects
-            for (int y = 0; y < grid.size(); ++y)
-            {
-                for (int x = 0; x < grid[y].size(); ++x)
-                {
-                    EDungeonPiece piece = grid[y][x];
-                    switch (piece)
-                    {
-                        case EDungeonPiece::Grass:
-                            //CreateNewGameObject(ETeam::Neutral, mpRootGameObject)->AddComponent<FloorComponent>();
-                            break;
-                        case EDungeonPiece::Wall:
-                            //CreateNewGameObject(ETeam::Neutral, mpRootGameObject)->AddComponent<WallComponent>();
-                            break;
-                        case EDungeonPiece::Empty:
-                            // Do nothing for empty tiles
-                            break;
-                    }
-                }
-            }
-        }
-    }
-#endif
 }
 
 //------------------------------------------------------------------------------------------------------------------------
@@ -219,7 +178,7 @@ void GameManager::DebugUpdate(float deltaTime)
         {
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::H))
             {
-                pDungeonManager->GenerateDungeonGrid();
+                //pDungeonManager->GenerateDungeonGrid();
             }
         }
     }
@@ -245,7 +204,9 @@ void GameManager::UpdateGameObjects(float deltaTime)
 void GameManager::CleanUpDestroyedGameObjects(GameObject * pRoot)
 {
     if (!pRoot)
+    {
         return;
+    }
 
     auto & children = pRoot->GetChildren();
     std::vector<GameObject *> objectsToDelete;
@@ -367,71 +328,24 @@ void GameManager::Render(float deltaTime)
     }
     else
     {
-        // Render Dungeon
-        {
-            auto * pDungeonManager = GetManager<DungeonManager>();
-            if (pDungeonManager)
-            {
-                const auto & grid = pDungeonManager->GetDungeonGrid();
-                float cellWidth = 16.f;
-                float cellHeight = 16.f;
-
-                for (int y = 0; y < grid.size(); ++y)
-                {
-                    for (int x = 0; x < grid[y].size(); ++x)
-                    {
-                        sf::RectangleShape rect(sf::Vector2f(cellWidth, cellHeight));
-                        rect.setPosition(x * cellWidth, y * cellHeight);
-                        switch (grid[y][x])
-                        {
-                            case EDungeonPiece::Grass:
-                                rect.setFillColor(sf::Color::Green);
-                                break;
-                            case EDungeonPiece::Water:
-                                rect.setFillColor(sf::Color::Blue);
-                                break;
-                            case EDungeonPiece::Sand:
-                                rect.setFillColor(sf::Color::Yellow);
-                                break;
-                            case EDungeonPiece::Empty:
-                                rect.setFillColor(sf::Color::Black);
-                                break;
-                        }
-
-                        mpWindow->draw(rect);
-                    }
-                }
-            }
-        }
+        mpWindow->setMouseCursorVisible(mShowImGuiWindow);
 
         if (mpRootGameObject)
         {
             mpWindow->draw(*mpRootGameObject);
         }
 
-        auto * pScoreManager = GetManager<ScoreManager>();
-        if (pScoreManager)
+        for (auto pManager : mManagers)
         {
-            mpWindow->draw(pScoreManager->GetScoreText());
-            for (auto & life : pScoreManager->GetSpriteLives())
-            {
-                mpWindow->draw(life);
-            }
+            pManager.second->Render(*mpWindow);
         }
-
-        if (!mPaused)
-        {
-            sf::Vector2i mousePosition = sf::Mouse::getPosition(*mpWindow);
-            mCursorSprite.setPosition(float(mousePosition.x), float(mousePosition.y));
-            mpWindow->draw(mCursorSprite);
-        }        
     }
 
     // ImGui && Debug mode
     {
         int imGuiTime = int(std::max(deltaTime, 0.0001f));
         ImGui::SFML::Update(*mpWindow, sf::milliseconds(1));
-        
+
         RenderImGui();
 
         // Render ImGui draw data
@@ -439,46 +353,6 @@ void GameManager::Render(float deltaTime)
     }
 
     mpWindow->display();
-}
-
-//------------------------------------------------------------------------------------------------------------------------
-
-void GameManager::RenderDebugMode()
-{
-    auto * pDungeonManager = GetManager<DungeonManager>();
-    if (pDungeonManager)
-    {
-        const auto & grid = pDungeonManager->GetDungeonGrid();
-        float cellWidth = 16.f;
-        float cellHeight = 16.f;
-
-        for (int y = 0; y < grid.size(); ++y)
-        {
-            for (int x = 0; x < grid[y].size(); ++x)
-            {
-                sf::RectangleShape rect(sf::Vector2f(cellWidth, cellHeight));
-                rect.setPosition(x * cellWidth, y * cellHeight);
-
-                switch (grid[y][x])
-                {
-                    case EDungeonPiece::Grass:
-                        rect.setFillColor(sf::Color::Green);
-                        break;
-                    case EDungeonPiece::Water:
-                        rect.setFillColor(sf::Color::Blue);
-                        break;
-                    case EDungeonPiece::Sand:
-                        rect.setFillColor(sf::Color::Yellow);
-                        break;
-                    case EDungeonPiece::Empty:
-                        rect.setFillColor(sf::Color::Black);
-                        break;
-                }
-
-                mpWindow->draw(rect);
-            }
-        }
-    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------
@@ -567,18 +441,17 @@ void GameManager::SetPausedState(bool pause)
 
 //------------------------------------------------------------------------------------------------------------------------
 
+sf::RenderWindow & GameManager::GetWindow()
+{
+    assert(mpWindow && "mpWindow is nullptr!");
+    return *mpWindow;
+}
+
+//------------------------------------------------------------------------------------------------------------------------
+
 void GameManager::InitWindow()
 {
-    ResourceId resourceId("Art/Crosshair.png");
-    auto pTexture = GetManager<ResourceManager>()->GetTexture(resourceId);
-    mCursorSprite.setTexture(*pTexture);
-    mCursorSprite.setScale(.25f, .25f);
-
-    sf::FloatRect localBounds = mCursorSprite.getLocalBounds();
-    mCursorSprite.setOrigin(
-        localBounds.width / 2.0f,
-        localBounds.height / 2.0f
-    );
+    mpWindow->setMouseCursorVisible(false);
 }
 
 //------------------------------------------------------------------------------------------------------------------------

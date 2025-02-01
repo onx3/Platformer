@@ -13,7 +13,7 @@ DropMovementComponent::DropMovementComponent(GameObject * pGameOwner)
         mStartPosition = pSpriteComponent->GetPosition();
 
         // Determine the movement direction based on the starting position
-        sf::Vector2u windowSize = GetGameObject().GetGameManager().mpWindow->getSize();
+        sf::Vector2u windowSize = GetGameObject().GetGameManager().GetWindow().getSize();
         sf::Vector2f windowCenter(windowSize.x / 2.0f, windowSize.y / 2.0f);
 
         // Calculate direction from the starting position outward
@@ -42,7 +42,7 @@ void DropMovementComponent::Update(float deltaTime)
             spriteComponent->SetPosition(position);
 
             // Remove the object if it moves out of the screen
-            sf::Vector2u windowSize = GetGameObject().GetGameManager().mpWindow->getSize();
+            sf::Vector2u windowSize = GetGameObject().GetGameManager().GetWindow().getSize();
             if (position.x + spriteComponent->GetWidth() < 0 ||
                 position.x > windowSize.x ||
                 position.y + spriteComponent->GetHeight() < 0 ||

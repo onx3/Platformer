@@ -22,14 +22,6 @@ EnemyAIManager::EnemyAIManager(GameManager * pGameManager)
 
 //------------------------------------------------------------------------------------------------------------------------
 
-EnemyAIManager::EnemyAIManager(GameManager * pGameManager, int enemyCount)
-	: BaseManager(pGameManager)
-{
-	AddEnemies(enemyCount, EEnemy::Asteroid, sf::Vector2f());
-}
-
-//------------------------------------------------------------------------------------------------------------------------
-
 EnemyAIManager::~EnemyAIManager()
 {
 
@@ -72,8 +64,9 @@ void EnemyAIManager::OnGameEnd()
 
 sf::Vector2f EnemyAIManager::GetRandomSpawnPosition()
 {
-    const int screenWidth = mpGameManager->mpWindow->getSize().x;
-    const int screenHeight = mpGameManager->mpWindow->getSize().y;
+    auto windowSize = mpGameManager->GetWindow().getSize();
+    const int screenWidth = windowSize.x;
+    const int screenHeight = windowSize.y;
 
     const float spawnOffset = 500.0f; // Increased offset for smoother appearance
 

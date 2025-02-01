@@ -1,5 +1,4 @@
 #pragma once
-#include "AstroidsPrivate.h"
 #include "GameComponent.h"
 #include <functional>
 
@@ -23,10 +22,9 @@ public:
 	void SetLifeLostCallback(std::function<void()> callback);
 
 	virtual void Update(float deltaTime) override;
-
 	virtual void DebugImGuiComponentInfo() override;
-
 	virtual std::string & GetClassName() override;
+
 private:
 	int mHealth;
 	int mMaxHealth;

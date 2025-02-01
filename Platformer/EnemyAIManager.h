@@ -1,5 +1,4 @@
 #pragma once
-#include "AstroidsPrivate.h"
 #include "BaseManager.h"
 #include <vector>
 #include "GameObject.h"
@@ -16,12 +15,10 @@ class EnemyAIManager : public BaseManager
 {
 public:
 	EnemyAIManager(GameManager * pGameManager);
-	EnemyAIManager(GameManager * pGameManager, int enemyCount);
 	~EnemyAIManager();
 
-	void Update(float deltaTime) override;
-
-	void OnGameEnd() override;
+	virtual void Update(float deltaTime) override;
+	virtual void OnGameEnd() override;
 
 	void RemoveEnemy(GameObject * pEnemy);
 	void RespawnEnemy(EEnemy type, sf::Vector2f pos);
@@ -41,7 +38,7 @@ private:
 
 	EDropType DetermineDropType() const;
 
-	const int mMaxEnemies = 0;
+	const int mMaxEnemies = 1;
 	std::vector<GameObject *> mEnemyObjects;
 };
 

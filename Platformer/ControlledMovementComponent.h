@@ -1,6 +1,5 @@
 #pragma once
 
-#include "AstroidsPrivate.h"
 #include "GameComponent.h"
 #include "DungeonManager.h"
 
@@ -19,9 +18,9 @@ public:
 
 	~ControlledMovementComponent();
 
-	void Update(float deltaTime) override;
+	virtual void Update(float deltaTime) override;
 
-	std::string & GetClassName() override;
+	virtual std::string & GetClassName() override;
 
 	void SetVelocityX(float velo);
 	void SetVelocityY(float velo);

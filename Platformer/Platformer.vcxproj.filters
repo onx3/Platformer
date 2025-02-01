@@ -17,11 +17,11 @@
     <Filter Include="ExtLibs\ImGui">
       <UniqueIdentifier>{088dc731-a488-4a55-9dfb-d32595648584}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Core">
+      <UniqueIdentifier>{e2cd0ba0-ed7f-41ea-897f-cacb4be8e20e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AstroidsPrivate.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GameManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -85,9 +85,6 @@
     <ClCompile Include="SpriteComponent.cpp">
       <Filter>Components</Filter>
     </ClCompile>
-    <ClCompile Include="DungeonManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="imgui.cpp">
       <Filter>ExtLibs\ImGui</Filter>
     </ClCompile>
@@ -103,14 +100,26 @@
     <ClCompile Include="imgui-SFML.cpp">
       <Filter>ExtLibs\ImGui</Filter>
     </ClCompile>
+    <ClCompile Include="DungeonManager.cpp">
+      <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="AstroidsPrivate.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraManager.cpp">
+      <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="BulletComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="BulletPoolManager.cpp">
+      <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="LevelManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AstroidsPrivate.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="BDConfig.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="GameManager.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -171,6 +180,24 @@
     <ClInclude Include="SpriteComponent.h">
       <Filter>Components</Filter>
     </ClInclude>
-    <ClInclude Include="DungeonManager.h" />
+    <ClInclude Include="DungeonManager.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="AstroidsPrivate.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="BDConfig.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraManager.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="BulletComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="BulletPoolManager.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="LevelManager.h" />
   </ItemGroup>
 </Project>

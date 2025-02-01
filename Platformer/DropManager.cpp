@@ -23,19 +23,12 @@ void DropManager::Update(float deltaTime)
         {
             if (!pDrop->GetComponent<ExplosionComponent>().lock())
             {
-                auto * pWindow = mpGameManager->mpWindow;
-                if (pWindow)
-                {
-                    sf::Vector2u windowSize = mpGameManager->mpWindow->getSize();
-                    sf::Vector2f centerPosition(float(windowSize.x) / 2.0f, float(windowSize.y) / 2.0f);
-                    auto explosionComp = std::make_shared<ExplosionComponent>(
-                        pDrop, "Art/explosion.png", 32, 32, 7, 0.1f, sf::Vector2f(50.f, 50.f), centerPosition);
-                    pDrop->AddComponent(explosionComp);
-                }
-                else
-                {
-                    pDrop->Destroy();
-                }
+                auto & window = mpGameManager->GetWindow();
+                sf::Vector2u windowSize = window.getSize();
+                sf::Vector2f centerPosition(float(windowSize.x) / 2.0f, float(windowSize.y) / 2.0f);
+                auto explosionComp = std::make_shared<ExplosionComponent>(
+                    pDrop, "Art/explosion.png", 32, 32, 7, 0.1f, sf::Vector2f(50.f, 50.f), centerPosition);
+                pDrop->AddComponent(explosionComp);
             }
         }
     }

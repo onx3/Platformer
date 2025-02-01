@@ -1,5 +1,4 @@
 #pragma once
-#include "AstroidsPrivate.h"
 #include "GameComponent.h"
 #include <SFML/System/Vector2.hpp>
 #include <vector>
@@ -21,11 +20,9 @@ public:
 
     void Shoot();
 
-    void Update(float deltaTime) override;
-
-    void draw(sf::RenderTarget & target, sf::RenderStates states) override;
-
-    void DebugImGuiComponentInfo() override;
+    virtual void Update(float deltaTime) override;
+    virtual void draw(sf::RenderTarget & target, sf::RenderStates states) override;
+    virtual void DebugImGuiComponentInfo() override;
 
 private:
     struct Projectile

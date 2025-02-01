@@ -35,7 +35,7 @@ RandomMovementComponent::RandomMovementComponent(GameObject * pOwner)
         mStartPosition = pSpriteComponent->GetPosition(); // The off-screen spawn position
 
         // Set target position to a random edge of the screen
-        sf::Vector2u windowSize = GetGameObject().GetGameManager().mpWindow->getSize();
+        sf::Vector2u windowSize = GetGameObject().GetGameManager().GetWindow().getSize();
         int edge = randomEdge(rng);
 
         switch (edge)
@@ -72,7 +72,7 @@ void RandomMovementComponent::Update(float deltaTime)
         if (spriteComponent)
         {
             sf::Vector2f position = spriteComponent->GetPosition();
-            sf::Vector2u windowSize = GetGameObject().GetGameManager().mpWindow->getSize();
+            sf::Vector2u windowSize = GetGameObject().GetGameManager().GetWindow().getSize();
             sf::Vector2f size(spriteComponent->GetWidth(), spriteComponent->GetHeight());
 
             // Intro phase movement

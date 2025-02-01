@@ -1,5 +1,4 @@
 #pragma once
-#include "AstroidsPrivate.h"
 
 class GameManager;
 
@@ -10,6 +9,7 @@ public:
 	~BaseManager();
 
 	virtual void Update(float deltaTime);
+	virtual void Render(sf::RenderWindow & window);
 
 	virtual void OnGameEnd();
 

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "AstroidsPrivate.h"
 #include "BaseManager.h"
 
 class GameManager;
