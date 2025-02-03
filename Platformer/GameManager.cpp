@@ -44,7 +44,7 @@ GameManager::GameManager(WindowManager & windowManager)
     //Level Manager
     {
         AddManager<LevelManager>();
-        //GetManager<LevelManager>()->LoadLevel("Levels/Level1.json");
+        GetManager<LevelManager>()->LoadLevel("../Levels/Level1.json");
     }
 
     AddManager<PlayerManager>();
@@ -328,16 +328,16 @@ void GameManager::Render(float deltaTime)
     }
     else
     {
+        for (auto pManager : mManagers)
+        {
+            pManager.second->Render(*mpWindow);
+        }
+
         mpWindow->setMouseCursorVisible(mShowImGuiWindow);
 
         if (mpRootGameObject)
         {
             mpWindow->draw(*mpRootGameObject);
-        }
-
-        for (auto pManager : mManagers)
-        {
-            pManager.second->Render(*mpWindow);
         }
     }
 

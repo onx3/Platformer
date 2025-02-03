@@ -38,7 +38,7 @@ private:
 
 	EDropType DetermineDropType() const;
 
-	const int mMaxEnemies = 1;
+	const int mMaxEnemies = 0;
 	std::vector<GameObject *> mEnemyObjects;
 };
 

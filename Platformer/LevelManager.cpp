@@ -1,5 +1,6 @@
 #include "AstroidsPrivate.h"
 #include "LevelManager.h"
+#include "ResourceManager.h"
 #include <fstream>
 #include <iostream>
 
@@ -10,7 +11,6 @@ LevelManager::LevelManager(GameManager * pGameManager)
 	, mHeight(0)
 	, mTileWidth(0)
 	, mTileHeight(0)
-	, mTileTexture()
 	, mTileSprites()
 {
 
@@ -20,6 +20,7 @@ LevelManager::LevelManager(GameManager * pGameManager)
 
 LevelManager::~LevelManager()
 {
+    ClearLevel();
 }
 
 //------------------------------------------------------------------------------------------------------------------------
@@ -70,20 +71,29 @@ void LevelManager::ParseTileData(const json & levelData)
     mTileSprites.clear();
     mTileData.clear();
 
+    ResourceManager * resourceManager = mpGameManager->GetManager<ResourceManager>();
+    auto resourceID = ResourceId("Art/Dungeon_Tileset.png");
+    auto tilesetTexture = resourceManager->GetTexture(resourceID);
+    if (!tilesetTexture)
+    {
+        std::cerr << "Failed to load tileset texture." << std::endl;
+        return;
+    }
+
     if (!levelData.contains("layers") || !levelData["layers"].is_array())
     {
-        printf("No Layers found");
+        std::cerr << "No layers found in level file." << std::endl;
         return;
     }
 
     for (const auto & layer : levelData["layers"])
     {
-        if (layer.contains("type") && layer["type"] == "tilelayer" && layer.contains("data"))
+        if (layer["type"] == "tilelayer" && layer.contains("data"))
         {
             const auto & data = layer["data"];
             if (!data.is_array())
             {
-                std::cerr << "Invalid level file: Layer data is not an array!" << std::endl;
+                std::cerr << "Invalid layer data." << std::endl;
                 return;
             }
 
@@ -94,19 +104,40 @@ void LevelManager::ParseTileData(const json & levelData)
                 for (int x = 0; x < mWidth; ++x)
                 {
                     int tileID = data[y * mWidth + x].get<int>();
-                    mTileData[y][x] = tileID;
 
-                    if (tileID > 0)
+                    // Extract transformation flags
+                    int actualTileID = tileID & 0x1FFFFFFF;
+                    bool flippedHorizontally = (tileID & 0x80000000) != 0;
+                    bool flippedVertically = (tileID & 0x40000000) != 0;
+                    bool flippedDiagonally = (tileID & 0x20000000) != 0;
+
+                    mTileData[y][x] = actualTileID;
+
+                    if (actualTileID > 0)
                     {
                         sf::Sprite sprite;
-                        sprite.setTexture(mTileTexture);
+                        sprite.setTexture(*tilesetTexture);
 
-                        int tilesetColumns = mTileTexture.getSize().x / mTileWidth;
-                        int tileX = (tileID - 1) % tilesetColumns;
-                        int tileY = (tileID - 1) / tilesetColumns;
+                        int columns = tilesetTexture->getSize().x / mTileWidth;
+                        int row = (actualTileID - 1) / columns;
+                        int column = (actualTileID - 1) % columns;
 
-                        sprite.setTextureRect(sf::IntRect(tileX * mTileWidth, tileY * mTileHeight, mTileWidth, mTileHeight));
-                        sprite.setPosition(static_cast<float>(x * mTileWidth), static_cast<float>(y * mTileHeight));
+                        sprite.setTextureRect(sf::IntRect(column * mTileWidth, row * mTileHeight, mTileWidth, mTileHeight));
+
+                        float worldX = static_cast<float>(x * mTileWidth);
+                        float worldY = static_cast<float>(y * mTileHeight);
+                        sprite.setPosition(worldX, worldY);
+
+                        // Apply transformations
+                        sf::Vector2f origin(mTileWidth / 2.0f, mTileHeight / 2.0f);
+                        sprite.setOrigin(origin);
+
+                        if (flippedHorizontally)
+                            sprite.scale(-1.f, 1.f); // Flip horizontally
+                        if (flippedVertically)
+                            sprite.scale(1.f, -1.f); // Flip vertically
+                        if (flippedDiagonally)
+                            sprite.setRotation(90.f); // 90-degree diagonal flip
 
                         mTileSprites.push_back(sprite);
                     }
@@ -115,7 +146,6 @@ void LevelManager::ParseTileData(const json & levelData)
         }
     }
 }
-
 
 //------------------------------------------------------------------------------------------------------------------------
 // EOF

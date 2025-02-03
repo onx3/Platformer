@@ -28,7 +28,6 @@ private:
 	int mTileWidth;
 	int mTileHeight;
 
-	sf::Texture mTileTexture;
 	std::vector<sf::Sprite> mTileSprites;
 
 };

@@ -101,25 +101,31 @@ void ControlledMovementComponent::Update(float deltaTime)
         float cellWidth = 16.0f;  // Example tile width
         float cellHeight = 16.0f; // Example tile height
 
-        if (pDungeonManager)
+        position = newPosition;
+
+        // Future Update : only able to walk on walkable tiles
         {
-            const auto & grid = pDungeonManager->GetDungeonGrid();
+             //if (pDungeonManager)
+             //{
+             //    const auto & grid = pDungeonManager->GetDungeonGrid();
 
-            // Determine the tile under the new position
-            int tileX = static_cast<int>(newPosition.x / cellWidth);
-            int tileY = static_cast<int>(newPosition.y / cellHeight);
+             //    // Determine the tile under the new position
+             //    int tileX = static_cast<int>(newPosition.x / cellWidth);
+             //    int tileY = static_cast<int>(newPosition.y / cellHeight);
 
-            if (tileX >= 0 && tileX < grid[0].size() && tileY >= 0 && tileY < grid.size())
-            {
-                EDungeonPiece tile = grid[tileY][tileX];
+             //    if (tileX >= 0 && tileX < grid[0].size() && tileY >= 0 && tileY < grid.size())
+             //    {
+             //        EDungeonPiece tile = grid[tileY][tileX];
 
-                // Update position only if the tile is walkable
-                //if (pDungeonManager->IsTileWalkable(tile))
-                {
-                    position = newPosition;
-                }
-            }
+             //        // Update position only if the tile is walkable
+             //        //if (pDungeonManager->IsTileWalkable(tile))
+             //        {
+             //            position = newPosition;
+             //        }
+             //    }
+             //}
         }
+        
 
         // Boundary checking (if tile-based movement allows going to edges)
         float halfWidth = size.x / 2.0f;

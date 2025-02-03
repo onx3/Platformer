@@ -26,6 +26,17 @@ ScoreManager::ScoreManager(GameManager * pGameManager)
 
 //------------------------------------------------------------------------------------------------------------------------
 
+void ScoreManager::Render(sf::RenderWindow & window)
+{
+	window.draw(GetScoreText());
+	for (auto & life : mSpriteLives)
+	{
+		window.draw(life);
+	}
+}
+
+//------------------------------------------------------------------------------------------------------------------------
+
 void ScoreManager::AddScore(int points)
 {
 	mScore += points;

@@ -7,8 +7,10 @@ class ScoreManager : public BaseManager
 {
 public:
 	ScoreManager(GameManager * pGameManager);
-	void AddScore(int points);
 
+	virtual void Render(sf::RenderWindow & window);
+
+	void AddScore(int points);
 	const sf::Text & GetScoreText();
 
 	std::vector<sf::Sprite> & GetSpriteLives();
