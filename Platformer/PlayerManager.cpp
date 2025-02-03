@@ -58,7 +58,7 @@ void PlayerManager::InitPlayer()
             auto pTexture = gameManager.GetManager<ResourceManager>()->GetTexture(resourceId);
             if (pTexture)
             {
-                pSpriteComponent->SetSprite(pTexture, sf::Vector2f(0.35f, 0.35f));
+                pSpriteComponent->SetSprite(pTexture, sf::Vector2f(0.25f, 0.25f));
                 pSpriteComponent->SetPosition(centerPosition);
             }
         }

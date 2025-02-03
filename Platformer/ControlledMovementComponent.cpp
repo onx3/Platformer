@@ -125,20 +125,7 @@ void ControlledMovementComponent::Update(float deltaTime)
              //    }
              //}
         }
-        
-
-        // Boundary checking (if tile-based movement allows going to edges)
-        float halfWidth = size.x / 2.0f;
-        float halfHeight = size.y / 2.0f;
-
-        position.x = std::clamp(position.x, halfWidth, windowSize.x - halfWidth);
-        position.y = std::clamp(position.y, halfHeight, windowSize.y - halfHeight);
-
         pSpriteComponent->SetPosition(position);
-
-        // Rotate sprite towards mouse
-        sf::RenderWindow & window = gameManager.GetWindow();
-        sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
 
         auto crosshairPosition = GetGameObject().GetGameManager().GetManager<CameraManager>()->GetCrosshairPosition();
         sf::Vector2f direction = crosshairPosition - position;

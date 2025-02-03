@@ -11,6 +11,7 @@
 #include "BDConfig.h"
 #include "PlayerManager.h"
 #include "ResourceManager.h"
+#include "CameraManager.h"
 
 ProjectileComponent::ProjectileComponent(GameObject * pOwner)
 	: GameComponent(pOwner)
@@ -76,17 +77,10 @@ void ProjectileComponent::Shoot()
 			offset = sf::Vector2f(-playerSize.y / 2.f, 0);
 		}
 
-		// Final spawn position: ship position + offset
 		sf::Vector2f spawnPosition = playerPosition + offset;
 
-		// Get mouse position relative to the window
-		sf::Vector2i mousePos = sf::Mouse::getPosition(GetGameObject().GetGameManager().GetWindow());
-		sf::Vector2f mousePosition(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
-
-		// Calculate direction vector
-		sf::Vector2f direction = mousePosition - spawnPosition;
-
-		// Normalize the direction vector
+		auto crosshairPosition = GetGameObject().GetGameManager().GetManager<CameraManager>()->GetCrosshairPosition();
+		sf::Vector2f direction = crosshairPosition - spawnPosition;
 		float length = std::sqrt(direction.x * direction.x + direction.y * direction.y);
 		if (length != 0)
 		{
@@ -110,8 +104,6 @@ void ProjectileComponent::Shoot()
             true
         );
 		pProjectile->AddComponent(pCollisionComponent);
-
-		// Add the projectile to the projectiles list
 		mProjectiles.push_back({ pProjectile, 3.f, 15, direction });
 	}
 }

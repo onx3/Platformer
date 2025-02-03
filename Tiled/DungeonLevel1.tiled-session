@@ -7,17 +7,18 @@
     "expandedProjectPaths": [
         "."
     ],
+    "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
         "D:/Platformer/Levels/Level1.json": {
-            "scale": 0.75,
+            "scale": 0.33,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 453.33333333333337,
-                "y": 330.6666666666667
+                "x": 1287.878787878788,
+                "y": 950.0000000000001
             }
         },
         "Dungeon_Tileset.tsx": {
-            "scaleInDock": 2,
+            "scaleInDock": 3,
             "scaleInEditor": 3
         }
     },
