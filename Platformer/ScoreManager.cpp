@@ -60,7 +60,7 @@ std::vector<sf::Sprite> & ScoreManager::GetSpriteLives()
 
     // Find the player GameObject and get its HealthComponent
     int lives = 0;
-    auto * pPlayerManager = mpGameManager->GetManager<PlayerManager>();
+	auto * pPlayerManager = GetGameManager().GetManager<PlayerManager>();
 	if (pPlayerManager->GetPlayers().empty())
 	{
 		return mSpriteLives;

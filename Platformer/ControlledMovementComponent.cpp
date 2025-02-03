@@ -98,8 +98,8 @@ void ControlledMovementComponent::Update(float deltaTime)
         // Get grid and tile size
         auto & gameManager = GetGameObject().GetGameManager();
         auto pDungeonManager = gameManager.GetManager<DungeonManager>();
-        float cellWidth = 16.0f;  // Example tile width
-        float cellHeight = 16.0f; // Example tile height
+        float cellWidth = 16.0f;
+        float cellHeight = 16.0f;
 
         position = newPosition;
 

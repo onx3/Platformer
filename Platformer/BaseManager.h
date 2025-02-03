@@ -10,10 +10,10 @@ public:
 
 	virtual void Update(float deltaTime);
 	virtual void Render(sf::RenderWindow & window);
-
 	virtual void OnGameEnd();
 
-protected:
+	GameManager & GetGameManager() const;
+private:
 	GameManager * mpGameManager;
 };
 

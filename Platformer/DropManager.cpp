@@ -23,7 +23,7 @@ void DropManager::Update(float deltaTime)
         {
             if (!pDrop->GetComponent<ExplosionComponent>().lock())
             {
-                auto & window = mpGameManager->GetWindow();
+                auto & window = GetGameManager().GetWindow();
                 sf::Vector2u windowSize = window.getSize();
                 sf::Vector2f centerPosition(float(windowSize.x) / 2.0f, float(windowSize.y) / 2.0f);
                 auto explosionComp = std::make_shared<ExplosionComponent>(
@@ -72,14 +72,15 @@ void DropManager::SpawnDrop(EDropType dropType, const sf::Vector2f & position)
 {
     if (dropType == EDropType::None) return;
 
+    auto & gameManager = GetGameManager();
     GameObject * pDrop = nullptr;
     if (dropType == EDropType::NukePickup)
     {
-        pDrop = mpGameManager->CreateNewGameObject(ETeam::NukeDrop, mpGameManager->GetRootGameObject());
+        pDrop = gameManager.CreateNewGameObject(ETeam::NukeDrop, gameManager.GetRootGameObject());
     }
     else if (dropType == EDropType::LifePickup)
     {
-        pDrop = mpGameManager->CreateNewGameObject(ETeam::LifeDrop, mpGameManager->GetRootGameObject());
+        pDrop = gameManager.CreateNewGameObject(ETeam::LifeDrop, gameManager.GetRootGameObject());
     }
     if (pDrop != nullptr)
     {
@@ -97,7 +98,7 @@ void DropManager::SpawnDrop(EDropType dropType, const sf::Vector2f & position)
                 case EDropType::NukePickup:
                     file = "Art/Nuke.png";
                     resourceId = ResourceId(file);
-                    pSpriteTexture = mpGameManager->GetManager<ResourceManager>()->GetTexture(resourceId);
+                    pSpriteTexture = gameManager.GetManager<ResourceManager>()->GetTexture(resourceId);
                     if (pSpriteTexture)
                     {
                         pSpriteComp->SetSprite(pSpriteTexture, sf::Vector2f(1, 1));
@@ -106,7 +107,7 @@ void DropManager::SpawnDrop(EDropType dropType, const sf::Vector2f & position)
                 case EDropType::LifePickup:
                     file = "Art/Life.png";
                     resourceId = ResourceId(file);
-                    pSpriteTexture = mpGameManager->GetManager<ResourceManager>()->GetTexture(resourceId);
+                    pSpriteTexture = gameManager.GetManager<ResourceManager>()->GetTexture(resourceId);
                     if (pSpriteTexture)
                     {
                         pSpriteComp->SetSprite(pSpriteTexture, sf::Vector2f(1, 1));
@@ -125,10 +126,10 @@ void DropManager::SpawnDrop(EDropType dropType, const sf::Vector2f & position)
             pDrop->AddComponent(pDropMovementComponent);
 
             // Add collision or interaction logic for pickup
-            pDrop->CreatePhysicsBody(&mpGameManager->GetPhysicsWorld(), pDrop->GetSize(), true);
+            pDrop->CreatePhysicsBody(&gameManager.GetPhysicsWorld(), pDrop->GetSize(), true);
 
             auto pCollisionComp = std::make_shared<CollisionComponent>(
-                pDrop, &mpGameManager->GetPhysicsWorld(), pDrop->GetPhysicsBody(), pDrop->GetSize(), true);
+                pDrop, &gameManager.GetPhysicsWorld(), pDrop->GetPhysicsBody(), pDrop->GetSize(), true);
             pDrop->AddComponent(pCollisionComp);
         }
     }

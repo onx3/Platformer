@@ -40,12 +40,13 @@ PlayerManager::~PlayerManager()
 
 void PlayerManager::InitPlayer()
 {
-    auto * pPlayer = mpGameManager->CreateNewGameObject(ETeam::Player, mpGameManager->GetRootGameObject());
+    auto & gameManager = GetGameManager();
+    auto * pPlayer = gameManager.CreateNewGameObject(ETeam::Player, gameManager.GetRootGameObject());
     mPlayerObjects.push_back(pPlayer);
 
     // Sprite Component
     {
-        sf::Vector2u windowSize = mpGameManager->GetWindow().getSize();
+        sf::Vector2u windowSize = gameManager.GetWindow().getSize();
         sf::Vector2f centerPosition(float(windowSize.x) / 2.0f, float(windowSize.y) / 2.0f);
 
         auto pSpriteComponent = pPlayer->GetComponent<SpriteComponent>().lock();
@@ -54,7 +55,7 @@ void PlayerManager::InitPlayer()
             std::string file = "Art/Player.png";
             ResourceId resourceId(file);
 
-            auto pTexture = mpGameManager->GetManager<ResourceManager>()->GetTexture(resourceId);
+            auto pTexture = gameManager.GetManager<ResourceManager>()->GetTexture(resourceId);
             if (pTexture)
             {
                 pSpriteComponent->SetSprite(pTexture, sf::Vector2f(0.35f, 0.35f));
@@ -96,10 +97,10 @@ void PlayerManager::InitPlayer()
         auto pCollisionComponent = pPlayer->GetComponent<CollisionComponent>().lock();
         if (!pCollisionComponent)
         {
-            pPlayer->CreatePhysicsBody(&mpGameManager->GetPhysicsWorld(), pPlayer->GetSize(), true);
+            pPlayer->CreatePhysicsBody(&gameManager.GetPhysicsWorld(), pPlayer->GetSize(), true);
             pPlayer->AddComponent(std::make_shared<CollisionComponent>(
                 pPlayer,
-                &mpGameManager->GetPhysicsWorld(),
+                &gameManager.GetPhysicsWorld(),
                 pPlayer->GetPhysicsBody(),
                 pPlayer->GetSize(),
                 true
@@ -109,7 +110,7 @@ void PlayerManager::InitPlayer()
 
     // CameraManager
     {
-        auto * pCameraManager = mpGameManager->GetManager<CameraManager>();
+        auto * pCameraManager = gameManager.GetManager<CameraManager>();
         if (pCameraManager)
         {
             pCameraManager->SetTarget(pPlayer);
@@ -121,11 +122,12 @@ void PlayerManager::InitPlayer()
 
 void PlayerManager::Update(float deltaTime)
 {
+    auto & gameManager = GetGameManager();
     CleanUpDeadPlayers();
 
     if (mPlayerObjects.empty())
     {
-        mpGameManager->EndGame();
+        gameManager.EndGame();
     }
     else
     {
@@ -160,7 +162,7 @@ void PlayerManager::Update(float deltaTime)
                     std::string file = "Art/playerDamaged.png";
                     ResourceId resourceId(file);
 
-                    auto texture = mpGameManager->GetManager<ResourceManager>()->GetTexture(resourceId);
+                    auto texture = gameManager.GetManager<ResourceManager>()->GetTexture(resourceId);
                     if (texture)
                     {
                         pSpriteComponent->SetSprite(texture, pSpriteComponent->GetSprite().getScale());

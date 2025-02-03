@@ -10,7 +10,7 @@ CameraManager::CameraManager(GameManager * pGameManager)
 	, mPreviousViewCenter()
 {
 	ResourceId resourceId("Art/Crosshair.png");
-	auto pTexture = mpGameManager->GetManager<ResourceManager>()->GetTexture(resourceId);
+	auto pTexture = GetGameManager().GetManager<ResourceManager>()->GetTexture(resourceId);
 	mCursorSprite.setTexture(*pTexture);
 	mCursorSprite.setScale(.25f, .25f);
 
@@ -36,16 +36,14 @@ void CameraManager::Update(float deltaTime)
 
 	sf::Vector2f cameraDelta = mView.getCenter() - previousCenter;
 
-	if (mpGameManager)
-	{
-		mpGameManager->GetWindow().setView(mView);
+	auto & gameManager = GetGameManager();
+	gameManager.GetWindow().setView(mView);
 
-		sf::Vector2f cursorWorldPos = mpGameManager->GetWindow().mapPixelToCoords(
-			sf::Mouse::getPosition(mpGameManager->GetWindow()), mView
-		);
+	sf::Vector2f cursorWorldPos = gameManager.GetWindow().mapPixelToCoords(
+		sf::Mouse::getPosition(gameManager.GetWindow()), mView
+	);
 
-		mCursorSprite.setPosition(cursorWorldPos);
-	}
+	mCursorSprite.setPosition(cursorWorldPos);
 }
 
 //------------------------------------------------------------------------------------------------------------------------

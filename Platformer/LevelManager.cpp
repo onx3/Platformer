@@ -71,7 +71,7 @@ void LevelManager::ParseTileData(const json & levelData)
     mTileSprites.clear();
     mTileData.clear();
 
-    ResourceManager * resourceManager = mpGameManager->GetManager<ResourceManager>();
+    ResourceManager * resourceManager = GetGameManager().GetManager<ResourceManager>();
     auto resourceID = ResourceId("Art/Dungeon_Tileset.png");
     auto tilesetTexture = resourceManager->GetTexture(resourceID);
     if (!tilesetTexture)

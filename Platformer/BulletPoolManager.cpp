@@ -23,7 +23,8 @@ GameObject * BulletPoolManager::GetBullet()
 	
 	// Create a new Bullet
 	{
-		GameObject * pNewBullet = mpGameManager->CreateNewGameObject(ETeam::Enemy, mpGameManager->GetRootGameObject());
+		auto & gameManager = GetGameManager();
+		GameObject * pNewBullet = gameManager.CreateNewGameObject(ETeam::Enemy, gameManager.GetRootGameObject());
 
 		// Bullet Component
 		{
@@ -34,10 +35,10 @@ GameObject * BulletPoolManager::GetBullet()
 			auto pCollisionComponent = pNewBullet->GetComponent<CollisionComponent>().lock();
 			if (!pCollisionComponent)
 			{
-				pNewBullet->CreatePhysicsBody(&mpGameManager->GetPhysicsWorld(), pNewBullet->GetSize(), true);
+				pNewBullet->CreatePhysicsBody(&gameManager.GetPhysicsWorld(), pNewBullet->GetSize(), true);
 				pNewBullet->AddComponent(std::make_shared<CollisionComponent>(
 					pNewBullet,
-					&mpGameManager->GetPhysicsWorld(),
+					&gameManager.GetPhysicsWorld(),
 					pNewBullet->GetPhysicsBody(),
 					pNewBullet->GetSize(),
 					true

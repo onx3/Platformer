@@ -64,7 +64,7 @@ void EnemyAIManager::OnGameEnd()
 
 sf::Vector2f EnemyAIManager::GetRandomSpawnPosition()
 {
-    auto windowSize = mpGameManager->GetWindow().getSize();
+    auto windowSize = GetGameManager().GetWindow().getSize();
     const int screenWidth = windowSize.x;
     const int screenHeight = windowSize.y;
 
@@ -117,9 +117,10 @@ void EnemyAIManager::RespawnEnemy(EEnemy type, sf::Vector2f pos)
 
 void EnemyAIManager::AddEnemies(int count, EEnemy type, sf::Vector2f pos)
 {
+    auto & gameManager = GetGameManager();
     for (int i = 0; i < count; ++i)
     {
-        auto * pEnemy = mpGameManager->CreateNewGameObject(ETeam::Enemy, mpGameManager->GetRootGameObject());
+        auto * pEnemy = gameManager.CreateNewGameObject(ETeam::Enemy, gameManager.GetRootGameObject());
         mEnemyObjects.push_back(pEnemy);
 
         auto pSpriteComp = pEnemy->GetComponent<SpriteComponent>().lock();
@@ -131,7 +132,7 @@ void EnemyAIManager::AddEnemies(int count, EEnemy type, sf::Vector2f pos)
                 std::string file = GetEnemyFile(type);
                 auto scale = sf::Vector2f(.08f, .08f);
                 ResourceId resourceId(file);
-                auto pTexture = mpGameManager->GetManager<ResourceManager>()->GetTexture(resourceId);
+                auto pTexture = gameManager.GetManager<ResourceManager>()->GetTexture(resourceId);
 
                 pSpriteComp->SetSprite(pTexture, scale);
                 pSpriteComp->SetPosition(pos);
@@ -151,10 +152,10 @@ void EnemyAIManager::AddEnemies(int count, EEnemy type, sf::Vector2f pos)
             }
             {
                 gTimers[2].Start();
-                pEnemy->CreatePhysicsBody(&mpGameManager->GetPhysicsWorld(), pEnemy->GetSize(), true);
+                pEnemy->CreatePhysicsBody(&gameManager.GetPhysicsWorld(), pEnemy->GetSize(), true);
                 auto pCollisionComp = std::make_shared<CollisionComponent>(
                     pEnemy,
-                    &mpGameManager->GetPhysicsWorld(),
+                    &gameManager.GetPhysicsWorld(),
                     pEnemy->GetPhysicsBody(),
                     pEnemy->GetSize(),
                     true
@@ -238,6 +239,7 @@ const std::vector<GameObject *> & EnemyAIManager::GetEnemies() const
 
 void EnemyAIManager::OnDeath(GameObject * pEnemy)
 {
+    auto & gameManager = GetGameManager();
     // Explosion
     if (!pEnemy->GetComponent<ExplosionComponent>().lock())
     {
@@ -247,13 +249,13 @@ void EnemyAIManager::OnDeath(GameObject * pEnemy)
     }
     // Add Score
     {
-        auto pScoreManager = mpGameManager->GetManager<ScoreManager>();
+        auto pScoreManager = gameManager.GetManager<ScoreManager>();
         pScoreManager->AddScore(1000);
     }
     // Drops
     {
         EDropType dropType = DetermineDropType();
-        auto pDropManager = mpGameManager->GetManager<DropManager>();
+        auto pDropManager = gameManager.GetManager<DropManager>();
         if (pDropManager)
         {
             sf::Vector2f position = pEnemy->GetPosition();
