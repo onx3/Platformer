@@ -6,6 +6,8 @@
 #include "BDConfig.h"
 #include "ResourceManager.h"
 #include "CameraManager.h"
+#include "LevelManager.h"
+#include "imgui.h"
 
 ControlledMovementComponent::ControlledMovementComponent(GameObject * pOwner)
     : GameComponent(pOwner)
@@ -97,33 +99,23 @@ void ControlledMovementComponent::Update(float deltaTime)
 
         // Get grid and tile size
         auto & gameManager = GetGameObject().GetGameManager();
-        auto pDungeonManager = gameManager.GetManager<DungeonManager>();
+        auto pLevelManager = gameManager.GetManager<LevelManager>();
         float cellWidth = 16.0f;
         float cellHeight = 16.0f;
 
-        position = newPosition;
-
-        // Future Update : only able to walk on walkable tiles
+        // Check if the tile is walkable
         {
-             //if (pDungeonManager)
-             //{
-             //    const auto & grid = pDungeonManager->GetDungeonGrid();
+             if (pLevelManager)
+             {
+                 // Determine the tile under the new position
+                 int tileX = static_cast<int>(newPosition.x / cellWidth);
+                 int tileY = static_cast<int>(newPosition.y / cellHeight);
 
-             //    // Determine the tile under the new position
-             //    int tileX = static_cast<int>(newPosition.x / cellWidth);
-             //    int tileY = static_cast<int>(newPosition.y / cellHeight);
-
-             //    if (tileX >= 0 && tileX < grid[0].size() && tileY >= 0 && tileY < grid.size())
-             //    {
-             //        EDungeonPiece tile = grid[tileY][tileX];
-
-             //        // Update position only if the tile is walkable
-             //        //if (pDungeonManager->IsTileWalkable(tile))
-             //        {
-             //            position = newPosition;
-             //        }
-             //    }
-             //}
+                 if (pLevelManager->IsTileWalkablePlayer(tileX, tileY))
+                 {
+                     position = newPosition;
+                 }
+             }
         }
         pSpriteComponent->SetPosition(position);
 
@@ -132,6 +124,14 @@ void ControlledMovementComponent::Update(float deltaTime)
         float angle = std::atan2(direction.y, direction.x) * 180.f / 3.14159f;
         pSpriteComponent->SetRotation(angle + 90.f);
     }
+}
+
+//------------------------------------------------------------------------------------------------------------------------
+
+void ControlledMovementComponent::DebugImGuiComponentInfo()
+{
+    auto gameObjPos = GetGameObject().GetPosition();
+    ImGui::Text("Position x,y: %.3f, %.3f", gameObjPos.x, gameObjPos.y);
 }
 
 //------------------------------------------------------------------------------------------------------------------------

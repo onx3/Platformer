@@ -10,15 +10,15 @@
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
         "D:/Platformer/Levels/Level1.json": {
-            "scale": 0.33,
+            "scale": 1.5,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 1287.878787878788,
-                "y": 950.0000000000001
+                "x": 1443.3333333333333,
+                "y": 741
             }
         },
         "Dungeon_Tileset.tsx": {
-            "scaleInDock": 3,
+            "scaleInDock": 2,
             "scaleInEditor": 3
         }
     },

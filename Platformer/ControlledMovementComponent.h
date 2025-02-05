@@ -19,13 +19,13 @@ public:
 	~ControlledMovementComponent();
 
 	virtual void Update(float deltaTime) override;
-
+	virtual void DebugImGuiComponentInfo() override;
 	virtual std::string & GetClassName() override;
 
 	void SetVelocityX(float velo);
 	void SetVelocityY(float velo);
-private:
 
+private:
 	sf::Vector2f mVelocity;
 	float mVelocityX;
 	float mVelocityY;

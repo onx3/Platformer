@@ -58,6 +58,28 @@ void LevelManager::Render(sf::RenderWindow & window)
 
 //------------------------------------------------------------------------------------------------------------------------
 
+bool LevelManager::IsTileWalkableAI(int x, int y) const
+{
+    if (y < 0 || y >= mHeight || x < 0 || x >= mWidth)
+        return false;
+
+    int tile = mTileData[y][x];
+    return (tile == 70);
+}
+
+//------------------------------------------------------------------------------------------------------------------------
+
+bool LevelManager::IsTileWalkablePlayer(int x, int y) const
+{
+    if (y < 0 || y >= mHeight || x < 0 || x >= mWidth)
+        return false;
+
+    int tile = mTileData[y][x];
+    return (tile == 7 || tile == 70);
+}
+
+//------------------------------------------------------------------------------------------------------------------------
+
 void LevelManager::ClearLevel()
 {
 	mTileData.clear();

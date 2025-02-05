@@ -7,6 +7,7 @@ CollisionComponent::CollisionComponent(GameObject * pOwner, b2World * pWorld, b2
     , mpWorld(pWorld)
     , mpBody(pBody)
     , mSize(size)
+    , mName("CollisionComponent")
 {
     mpBody->SetSleepingAllowed(false);
 }
@@ -35,6 +36,20 @@ void CollisionComponent::Update(float deltaTime)
             mpBody->SetTransform(box2dPosition, rotation);
         }
     }    
+}
+
+//------------------------------------------------------------------------------------------------------------------------
+
+void CollisionComponent::DebugImGuiComponentInfo()
+{
+
+}
+
+//------------------------------------------------------------------------------------------------------------------------
+
+std::string & CollisionComponent::GetClassName()
+{
+    return mName;
 }
 
 //------------------------------------------------------------------------------------------------------------------------

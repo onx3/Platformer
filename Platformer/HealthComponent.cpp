@@ -4,9 +4,9 @@
 #include "PlayerManager.h"
 #include "ExplosionComponent.h"
 #include "SpriteComponent.h"
-#include "imgui.h"
 #include <functional>
 #include <cmath>
+#include "imgui.h"
 
 HealthComponent::HealthComponent(GameObject * pOwner, int initialHealth, int maxHealth, int lifeCount, int maxLives, float hitCooldown)
     : GameComponent(pOwner)

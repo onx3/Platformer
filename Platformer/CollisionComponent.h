@@ -9,11 +9,14 @@ public:
     ~CollisionComponent();
 
     virtual void Update(float deltaTime) override;
+    virtual void DebugImGuiComponentInfo() override;
+    virtual std::string & GetClassName() override;
 
 private:
     b2Body * mpBody;
     b2World * mpWorld;
     sf::Vector2f mSize;
+    std::string mName;
 };
 
 //------------------------------------------------------------------------------------------------------------------------

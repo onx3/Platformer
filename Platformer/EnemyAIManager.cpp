@@ -11,6 +11,7 @@
 #include "ExplosionComponent.h"
 #include "DropManager.h"
 #include "ResourceManager.h"
+#include "AIPathComponent.h"
 
 
 Timer gTimers[3];
@@ -48,7 +49,7 @@ void EnemyAIManager::Update(float deltaTime)
 
 	while (mEnemyObjects.size() < mMaxEnemies)
 	{
-		sf::Vector2f spawnPosition = GetRandomSpawnPosition();
+		sf::Vector2f spawnPosition = sf::Vector2f(float(1183.723), float(851.008));
 		RespawnEnemy(EEnemy::Asteroid, spawnPosition);
 	}
 }
@@ -128,7 +129,6 @@ void EnemyAIManager::AddEnemies(int count, EEnemy type, sf::Vector2f pos)
         if (pSpriteComp)
         {
             {
-                gTimers[0].Start();
                 std::string file = GetEnemyFile(type);
                 auto scale = sf::Vector2f(.08f, .08f);
                 ResourceId resourceId(file);
@@ -137,21 +137,17 @@ void EnemyAIManager::AddEnemies(int count, EEnemy type, sf::Vector2f pos)
                 pSpriteComp->SetSprite(pTexture, scale);
                 pSpriteComp->SetPosition(pos);
                 pEnemy->AddComponent(pSpriteComp);
-                gTimers[0].Stop();
             }
             {
-                gTimers[1].Start();
-
-                // Add random movement AFTER smooth intro
-                auto pRandomMovementComp = std::make_shared<RandomMovementComponent>(pEnemy);
+                // AI Path Movement
+                auto pRandomMovementComp = std::make_shared<AIPathComponent>(pEnemy);
                 pEnemy->AddComponent(pRandomMovementComp);
 
+                // Health Component
                 auto pHealthComponent = std::make_shared<HealthComponent>(pEnemy, 10, 100, 1, 1);
                 pEnemy->AddComponent(pHealthComponent);
-                gTimers[1].Stop();
             }
             {
-                gTimers[2].Start();
                 pEnemy->CreatePhysicsBody(&gameManager.GetPhysicsWorld(), pEnemy->GetSize(), true);
                 auto pCollisionComp = std::make_shared<CollisionComponent>(
                     pEnemy,
@@ -161,7 +157,6 @@ void EnemyAIManager::AddEnemies(int count, EEnemy type, sf::Vector2f pos)
                     true
                 );
                 pEnemy->AddComponent(pCollisionComp);
-                gTimers[2].Stop();
             }
             
         }

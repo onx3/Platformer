@@ -1,6 +1,5 @@
 #include "AstroidsPrivate.h"
 #include "GameComponent.h"
-#include "imgui.h"
 #include "BDConfig.h"
 
 GameComponent::GameComponent(GameObject * pOwner)
@@ -22,6 +21,14 @@ GameObject & GameComponent::GetGameObject() const
 {
     assert(mpOwner && "mpOwner is nullptr!");
     return *mpOwner;
+}
+
+//------------------------------------------------------------------------------------------------------------------------
+
+GameManager & GameComponent::GetGameManager() const
+{
+    assert(mpOwner && "mpOwner is nullptr!");
+    return mpOwner->GetGameManager();
 }
 
 //------------------------------------------------------------------------------------------------------------------------

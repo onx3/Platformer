@@ -3,7 +3,6 @@
 #include <iostream>
 #include <cmath>
 #include <stack>
-#include "imgui.h"
 #include "GameObject.h"
 #include "SpriteComponent.h"
 #include "CollisionComponent.h"
@@ -12,6 +11,7 @@
 #include "PlayerManager.h"
 #include "ResourceManager.h"
 #include "CameraManager.h"
+#include "imgui.h"
 
 ProjectileComponent::ProjectileComponent(GameObject * pOwner)
 	: GameComponent(pOwner)
@@ -118,7 +118,7 @@ void ProjectileComponent::Update(float deltaTime)
 
 	if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && mTimeSinceLastShot >= mCooldown)
 	{
-		float rotationInDegrees = mpOwner->GetRotation(); // Assuming GetRotation() exists
+		float rotationInDegrees = mpOwner->GetRotation();
 		float rotationInRadians = rotationInDegrees * (3.14159f / 180.0f);
 
 		sf::Vector2f direction(std::sin(rotationInRadians), -std::cos(rotationInRadians));
@@ -146,6 +146,13 @@ void ProjectileComponent::DebugImGuiComponentInfo()
 		ImGui::Text("This is a projectile game object");
 	}
 #endif
+}
+
+//------------------------------------------------------------------------------------------------------------------------
+
+std::string & ProjectileComponent::GetClassName()
+{
+	return mName;
 }
 
 //------------------------------------------------------------------------------------------------------------------------

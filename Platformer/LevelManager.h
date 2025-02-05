@@ -4,7 +4,6 @@
 #include <unordered_map>
 #include "BaseManager.h"
 #include "SFML/Graphics.hpp"
-#include "SFML/json.hpp"
 #include "BaseManager.h"
 
 using json = nlohmann::json;
@@ -17,7 +16,10 @@ public:
 	bool LoadLevel(const std::string & filePath);
 	void ClearLevel();
 
-	virtual void Render(sf::RenderWindow & window) override;	
+	virtual void Render(sf::RenderWindow & window) override;
+
+	bool IsTileWalkableAI(int x, int y) const;
+	bool IsTileWalkablePlayer(int x, int y) const;
 
 private:
 	void ParseTileData(const json & levelData);
@@ -29,6 +31,5 @@ private:
 	int mTileHeight;
 
 	std::vector<sf::Sprite> mTileSprites;
-
 };
 

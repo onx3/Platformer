@@ -116,6 +116,9 @@
       <Filter>Managers</Filter>
     </ClCompile>
     <ClCompile Include="LevelManager.cpp">
+      <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="AIPathComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -198,6 +201,9 @@
     <ClInclude Include="BulletPoolManager.h">
       <Filter>Managers</Filter>
     </ClInclude>
-    <ClInclude Include="LevelManager.h" />
+    <ClInclude Include="LevelManager.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="AIPathComponent.h" />
   </ItemGroup>
 </Project>
