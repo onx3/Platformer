@@ -42,7 +42,6 @@ void PlayerManager::InitPlayer()
 {
     auto & gameManager = GetGameManager();
     auto * pPlayer = gameManager.CreateNewGameObject(ETeam::Player, gameManager.GetRootGameObject());
-    mPlayerObjects.push_back(pPlayer);
 
     // Sprite Component
     {
@@ -114,7 +113,7 @@ void PlayerManager::InitPlayer()
 void PlayerManager::Update(float deltaTime)
 {
     auto & gameManager = GetGameManager();
-    CleanUpDeadPlayers();
+    mPlayerObjects = gameManager.GetGameObjectsByTeam(ETeam::Player);
 
     if (mPlayerObjects.empty())
     {
@@ -203,19 +202,6 @@ void PlayerManager::OnPlayerDeath(GameObject * pPlayer)
             pPlayer, "Art/explosion.png", 32, 32, 7, 0.1f, sf::Vector2f(2.f, 2.f), pPlayer->GetPosition());
         pPlayer->AddComponent(explosionComp);
     }
-}
-
-//------------------------------------------------------------------------------------------------------------------------
-
-void PlayerManager::CleanUpDeadPlayers()
-{
-    auto newEnd = std::remove_if(mPlayerObjects.begin(), mPlayerObjects.end(),
-        [](GameObject * obj)
-        {
-            return obj->IsDestroyed();
-        });
-
-    mPlayerObjects.erase(newEnd, mPlayerObjects.end());
 }
 
 //------------------------------------------------------------------------------------------------------------------------

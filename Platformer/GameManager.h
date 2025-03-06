@@ -42,7 +42,8 @@ public:
 	template <typename T>
 	T * GetManager()
 	{
-		auto it = mManagers.find(typeid(T));
+		auto it = std::find_if(mManagers.begin(), mManagers.end(),
+			[](const auto & pair) { return pair.first == std::type_index(typeid(T)); });
 		if (it != mManagers.end())
 		{
 			return dynamic_cast<T *>(it->second);
@@ -61,6 +62,8 @@ public:
 	void SetPausedState(bool pause);
 
 	sf::RenderWindow & GetWindow();
+
+	std::vector<GameObject *> GetGameObjectsByTeam(ETeam team);
 
 	// Window
 	WindowManager & mWindowManager;
@@ -81,7 +84,7 @@ private:
 	std::vector<std::string> GetCommonResourcePaths();
 
 	bool mShowImGuiWindow;
-	std::unordered_map<std::type_index, BaseManager *> mManagers;
+	std::vector<std::pair<std::type_index, BaseManager *>> mManagers;
 	GameObject * mpRootGameObject;
 
 	// Audio

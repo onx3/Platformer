@@ -25,7 +25,14 @@ CameraManager::CameraManager(GameManager * pGameManager)
 
 void CameraManager::Update(float deltaTime)
 {
-	auto * pPlayer = GetGameManager().GetManager<PlayerManager>()->GetPlayers()[0];
+	auto pPlayerManager = GetGameManager().GetManager<PlayerManager>();
+	auto & players = pPlayerManager->GetPlayers();
+	if (players.empty())
+	{
+		return;
+	}
+
+	auto * pPlayer = players[0];
 	if (!pPlayer)
 	{
 		return;

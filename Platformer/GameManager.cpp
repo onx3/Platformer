@@ -30,27 +30,28 @@ GameManager::GameManager(WindowManager & windowManager)
     , mCollisionListener(this)
     , mPaused(false)
 {
-    // Keep this first
+    // Order Matters
     {
         AddManager<ResourceManager>();
+
+        InitWindow();
+        InitImGui();
+        mpRootGameObject = new GameObject(this, ETeam::Neutral);
+
+        AddManager<PlayerManager>();
+        AddManager<CameraManager>();
+
+        //Level Manager
+        {
+            AddManager<LevelManager>();
+            GetManager<LevelManager>()->LoadLevel("../Levels/Level1.json");
+        }
+
+        AddManager<EnemyAIManager>();
+        AddManager<ScoreManager>();
+        AddManager<DropManager>();
     }
-
-    InitWindow();
-    InitImGui();
-    mpRootGameObject = new GameObject(this, ETeam::Neutral);
-
-    AddManager<CameraManager>();
-
-    //Level Manager
-    {
-        AddManager<LevelManager>();
-        GetManager<LevelManager>()->LoadLevel("../Levels/Level1.json");
-    }
-
-    AddManager<PlayerManager>();
-    AddManager<EnemyAIManager>();
-    AddManager<ScoreManager>();
-    AddManager<DropManager>();
+    
 
     // End Game
     {
@@ -362,9 +363,10 @@ template <typename T>
 void GameManager::AddManager()
 {
     static_assert(std::is_base_of<BaseManager, T>::value, "T must inherit from BaseManager");
-    if (mManagers.find(typeid(T)) == mManagers.end())
+    if (std::none_of(mManagers.begin(), mManagers.end(),
+        [](const auto & pair) { return pair.first == std::type_index(typeid(T)); }))
     {
-        mManagers[typeid(T)] = new T(this);
+        mManagers.emplace_back(std::type_index(typeid(T)), new T(this));
     }
 }
 
@@ -374,10 +376,10 @@ template <typename T, typename... Args>
 void GameManager::AddManager(Args&&... args)
 {
     static_assert(std::is_base_of<BaseManager, T>::value, "T must inherit from BaseManager");
-
-    if (mManagers.find(typeid(T)) == mManagers.end())
+    if (std::none_of(mManagers.begin(), mManagers.end(),
+        [](const auto & pair) { return pair.first == std::type_index(typeid(T)); }))
     {
-        mManagers[typeid(T)] = new T(this, std::forward<Args>(args)...);
+        mManagers.emplace_back(std::type_index(typeid(T)), new T(this, std::forward<Args>(args)...));
     }
 }
 
@@ -423,6 +425,38 @@ sf::RenderWindow & GameManager::GetWindow()
 {
     assert(mpWindow && "mpWindow is nullptr!");
     return *mpWindow;
+}
+
+//------------------------------------------------------------------------------------------------------------------------
+
+std::vector<GameObject *> GameManager::GetGameObjectsByTeam(ETeam team)
+{
+    std::vector<GameObject *> gameObjects;
+    if (!mpRootGameObject)
+    {
+        return gameObjects;
+    }
+
+    std::stack<GameObject *> stack;
+    stack.push(mpRootGameObject);
+
+    while (!stack.empty())
+    {
+        GameObject * pCurrent = stack.top();
+        stack.pop();
+
+        if (pCurrent && !pCurrent->IsDestroyed() && pCurrent->GetTeam() == team)
+        {
+            gameObjects.push_back(pCurrent);
+        }
+
+        for (GameObject * pChild : pCurrent->GetChildren())
+        {
+            stack.push(pChild);
+        }
+    }
+    
+    return gameObjects;
 }
 
 //------------------------------------------------------------------------------------------------------------------------

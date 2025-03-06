@@ -26,7 +26,8 @@ std::string & ResourceId::GetName()
 //------------------------------------------------------------------------------------------------------------------------
 
 ResourceManager::ResourceManager(GameManager * pGameManager)
-	: BaseManager(pGameManager)
+    : BaseManager(pGameManager)
+    , mTextureResources()
 {
 }
 

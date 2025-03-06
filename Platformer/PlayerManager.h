@@ -19,7 +19,6 @@ public:
     const std::vector<GameObject *> & GetPlayers() const;
 
 private:
-    void CleanUpDeadPlayers();
     std::vector<GameObject *> mPlayerObjects;
 
     // Audio
