@@ -100,8 +100,8 @@ void ControlledMovementComponent::Update(float deltaTime)
         // Get grid and tile size
         auto & gameManager = GetGameObject().GetGameManager();
         auto pLevelManager = gameManager.GetManager<LevelManager>();
-        float cellWidth = 16.0f;
-        float cellHeight = 16.0f;
+        float cellWidth = BD::gsPixelCount;
+        float cellHeight = BD::gsPixelCount;
 
         // Check if the tile is walkable
         {

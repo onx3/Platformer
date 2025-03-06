@@ -140,8 +140,8 @@ void EnemyAIManager::AddEnemies(int count, EEnemy type, sf::Vector2f pos)
             }
             {
                 // AI Path Movement
-                auto pRandomMovementComp = std::make_shared<AIPathComponent>(pEnemy);
-                pEnemy->AddComponent(pRandomMovementComp);
+                auto pAIPathComponentComp = std::make_shared<AIPathComponent>(pEnemy);
+                pEnemy->AddComponent(pAIPathComponentComp);
 
                 // Health Component
                 auto pHealthComponent = std::make_shared<HealthComponent>(pEnemy, 10, 100, 1, 1);

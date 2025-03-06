@@ -23,6 +23,7 @@ WindowManager::~WindowManager()
 {
     ImGui::SFML::Shutdown();
     delete mpWindow;
+    mpWindow = nullptr;
 }
 
 //------------------------------------------------------------------------------------------------------------------------

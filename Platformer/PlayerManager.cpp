@@ -107,15 +107,6 @@ void PlayerManager::InitPlayer()
             ));
         }
     }
-
-    // CameraManager
-    {
-        auto * pCameraManager = gameManager.GetManager<CameraManager>();
-        if (pCameraManager)
-        {
-            pCameraManager->SetTarget(pPlayer);
-        }
-    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------

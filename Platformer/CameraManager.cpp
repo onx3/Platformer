@@ -2,10 +2,10 @@
 #include "CameraManager.h"
 #include "GameObject.h"
 #include "ResourceManager.h"
+#include "PlayerManager.h"
 
 CameraManager::CameraManager(GameManager * pGameManager)
 	: BaseManager(pGameManager)
-	, mpPlayer(nullptr)
 	, mCursorSprite()
 	, mPreviousViewCenter()
 {
@@ -25,13 +25,14 @@ CameraManager::CameraManager(GameManager * pGameManager)
 
 void CameraManager::Update(float deltaTime)
 {
-	if (!mpPlayer)
+	auto * pPlayer = GetGameManager().GetManager<PlayerManager>()->GetPlayers()[0];
+	if (!pPlayer)
 	{
 		return;
 	}
 
 	sf::Vector2f previousCenter = mView.getCenter();
-	sf::Vector2f targetPos = mpPlayer->GetPosition();
+	sf::Vector2f targetPos = pPlayer->GetPosition();
 	mView.setCenter(Lerp(mView.getCenter(), targetPos, 0.1f));
 
 	sf::Vector2f cameraDelta = mView.getCenter() - previousCenter;
@@ -57,13 +58,6 @@ void CameraManager::OnGameEnd()
 void CameraManager::Render(sf::RenderWindow & window)
 {
 	window.draw(mCursorSprite);
-}
-
-//------------------------------------------------------------------------------------------------------------------------
-
-void CameraManager::SetTarget(GameObject * pPlayer)
-{
-	mpPlayer = pPlayer;
 }
 
 //------------------------------------------------------------------------------------------------------------------------

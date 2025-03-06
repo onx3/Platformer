@@ -204,6 +204,8 @@
     <ClInclude Include="LevelManager.h">
       <Filter>Managers</Filter>
     </ClInclude>
-    <ClInclude Include="AIPathComponent.h" />
+    <ClInclude Include="AIPathComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

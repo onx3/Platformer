@@ -1,6 +1,9 @@
 #pragma once
 
-static float gsPixelCount = 16;
+namespace BD
+{
+	static float gsPixelCount = 16.f;
+};
 
 class WindowManager
 {

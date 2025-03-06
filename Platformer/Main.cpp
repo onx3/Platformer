@@ -35,6 +35,7 @@ int main()
             pGameManager->Render(deltaTime);
         }
         delete pGameManager;
+        pGameManager = nullptr;
 
         bool waitingForRestart = true;
         while (windowManager.GetWindow()->isOpen() && waitingForRestart)

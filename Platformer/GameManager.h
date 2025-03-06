@@ -80,8 +80,6 @@ private:
 
 	std::vector<std::string> GetCommonResourcePaths();
 
-	void DrawGrid(float cellWidth, float cellHeight);
-
 	bool mShowImGuiWindow;
 	std::unordered_map<std::type_index, BaseManager *> mManagers;
 	GameObject * mpRootGameObject;

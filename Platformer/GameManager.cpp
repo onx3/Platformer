@@ -229,6 +229,7 @@ void GameManager::CleanUpDestroyedGameObjects(GameObject * pRoot)
     {
         pObject->NotifyParentOfDeletion(); // Notify parent
         delete pObject;                    // Delete object
+        pObject = nullptr;
     }
 }
 
@@ -353,29 +354,6 @@ void GameManager::Render(float deltaTime)
     }
 
     mpWindow->display();
-}
-
-//------------------------------------------------------------------------------------------------------------------------
-
-void GameManager::DrawGrid(float cellWidth, float cellHeight)
-{
-    sf::VertexArray grid(sf::Lines);
-
-    sf::Vector2u windowSize = mpWindow->getSize();
-
-    for (float xx = 0; xx <= windowSize.x; xx += cellWidth)
-    {
-        grid.append(sf::Vertex(sf::Vector2f(xx, 0), sf::Color::White));
-        grid.append(sf::Vertex(sf::Vector2f(xx, float(windowSize.y)), sf::Color::White));
-    }
-
-    for (float yy = 0; yy <= windowSize.y; yy += cellHeight)
-    {
-        grid.append(sf::Vertex(sf::Vector2f(0, yy), sf::Color::White));
-        grid.append(sf::Vertex(sf::Vector2f(float(windowSize.x), yy), sf::Color::White));
-    }
-
-    mpWindow->draw(grid);
 }
 
 //------------------------------------------------------------------------------------------------------------------------
