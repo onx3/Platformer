@@ -33,6 +33,8 @@ public:
 private:
 	std::vector<sf::Vector2i> FindPath(sf::Vector2i start, sf::Vector2i goal);
 
+	sf::Vector2i FindClosestWalkableTile(sf::Vector2i targetTile);
+
 	std::string mName;
 	std::vector<sf::Vector2i> mPath;
 	size_t mPathIndex;
