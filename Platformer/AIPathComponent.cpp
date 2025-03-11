@@ -7,14 +7,26 @@
 #include "LevelManager.h"
 #include "CameraManager.h"
 
+//------------------------------------------------------------------------------------------------------------------------
+
+namespace
+{
+    static const int skSearchRadius = 5;
+    static const float skUpdateInterval = 1.f;
+}
+
+//------------------------------------------------------------------------------------------------------------------------
+
 AIPathComponent::AIPathComponent(GameObject * pGameObject)
     : GameComponent(pGameObject)
     , mName("AIPathComponent")
     , mPath()
     , mPathIndex(0)
     , mLastPlayerTile()
-    , mStopDistance(250.f)
+    , mStopDistance(150.f)
     , mMovementSpeed(200.f)
+    , mTimeSinceLastPlayerMovement(2.f)
+    , mPlayerPosition()
 {
 
 }
@@ -38,19 +50,25 @@ void AIPathComponent::Update(float deltaTime)
     }
 
     auto myPosition = GetGameObject().GetPosition();
-    auto playerPos = pPlayer->GetPosition();
 
-    float distanceSquared = (playerPos.x - myPosition.x) * (playerPos.x - myPosition.x) +
-        (playerPos.y - myPosition.y) * (playerPos.y - myPosition.y);
+    mTimeSinceLastPlayerMovement += deltaTime;
+    if (mTimeSinceLastPlayerMovement >= skUpdateInterval)
+    {
+        mPlayerPosition = pPlayer->GetPosition();
+        mTimeSinceLastPlayerMovement = 0.f;
+    }
+
+    float distanceSquared = (mPlayerPosition.x - myPosition.x) * (mPlayerPosition.x - myPosition.x) +
+        (mPlayerPosition.y - myPosition.y) * (mPlayerPosition.y - myPosition.y);
 
     if (distanceSquared <= mStopDistance * mStopDistance)
     {
         return;
     }
 
-    auto cellSize = BD::gsPixelCount;
+    auto cellSize = BD::gsPixelCountCellSize;
     sf::Vector2i myTile(static_cast<int>(myPosition.x / cellSize), static_cast<int>(myPosition.y / cellSize));
-    sf::Vector2i playerTile(static_cast<int>(playerPos.x / cellSize), static_cast<int>(playerPos.y / cellSize));
+    sf::Vector2i playerTile(static_cast<int>(mPlayerPosition.x / cellSize), static_cast<int>(mPlayerPosition.y / cellSize));
 
     sf::Vector2i goalTile = FindClosestWalkableTile(playerTile);
 
@@ -179,14 +197,12 @@ sf::Vector2i AIPathComponent::FindClosestWalkableTile(sf::Vector2i targetTile)
         return targetTile;
     }
 
-    int searchRadius = 5;
-
     sf::Vector2i closestTile = targetTile;
     int closestDist = INT_MAX;
 
-    for (int dx = -searchRadius; dx <= searchRadius; ++dx)
+    for (int dx = -skSearchRadius; dx <= skSearchRadius; ++dx)
     {
-        for (int dy = -searchRadius; dy <= searchRadius; ++dy)
+        for (int dy = -skSearchRadius; dy <= skSearchRadius; ++dy)
         {
             sf::Vector2i checkTile = { targetTile.x + dx, targetTile.y + dy };
             if (pLevelManager->IsTileWalkableAI(checkTile.x, checkTile.y))

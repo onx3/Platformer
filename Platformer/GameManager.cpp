@@ -39,14 +39,13 @@ GameManager::GameManager(WindowManager & windowManager)
         mpRootGameObject = new GameObject(this, ETeam::Neutral);
 
         AddManager<PlayerManager>();
-        AddManager<CameraManager>();
 
         //Level Manager
         {
             AddManager<LevelManager>();
             GetManager<LevelManager>()->LoadLevel("../Levels/Level1.json");
         }
-
+        AddManager<CameraManager>();
         AddManager<EnemyAIManager>();
         AddManager<ScoreManager>();
         AddManager<DropManager>();
@@ -330,7 +329,7 @@ void GameManager::Render(float deltaTime)
     }
     else
     {
-        for (auto pManager : mManagers)
+        for (auto & pManager : mManagers)
         {
             pManager.second->Render(*mpWindow);
         }

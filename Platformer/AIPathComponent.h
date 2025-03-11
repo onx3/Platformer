@@ -41,5 +41,7 @@ private:
 	sf::Vector2i mLastPlayerTile;
 	float mStopDistance;
 	float mMovementSpeed;
+	float mTimeSinceLastPlayerMovement;
+	sf::Vector2f mPlayerPosition;
 };
 
