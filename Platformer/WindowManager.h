@@ -2,7 +2,7 @@
 
 namespace BD
 {
-	static float gsPixelCount = 16.f;
+	static float gsPixelCountCellSize = 16.f;
 };
 
 class WindowManager

@@ -100,16 +100,15 @@ void ControlledMovementComponent::Update(float deltaTime)
         // Get grid and tile size
         auto & gameManager = GetGameObject().GetGameManager();
         auto pLevelManager = gameManager.GetManager<LevelManager>();
-        float cellWidth = BD::gsPixelCount;
-        float cellHeight = BD::gsPixelCount;
+        float cellSize = BD::gsPixelCountCellSize;
 
         // Check if the tile is walkable
         {
              if (pLevelManager)
              {
                  // Determine the tile under the new position
-                 int tileX = static_cast<int>(newPosition.x / cellWidth);
-                 int tileY = static_cast<int>(newPosition.y / cellHeight);
+                 int tileX = static_cast<int>(newPosition.x / cellSize);
+                 int tileY = static_cast<int>(newPosition.y / cellSize);
 
                  if (pLevelManager->IsTileWalkablePlayer(tileX, tileY))
                  {
