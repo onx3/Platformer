@@ -3,12 +3,14 @@
 #include <vector>
 #include "GameObject.h"
 #include "DropManager.h"
+#include "SpriteComponent.h"
 
 enum class EEnemy
 {
 	Ship,
 	Ufo,
-	Asteroid
+	Asteroid,
+	Tank
 };
 
 class EnemyAIManager : public BaseManager
@@ -37,6 +39,8 @@ private:
 	sf::Vector2f GetRandomSpawnPosition();
 
 	EDropType DetermineDropType() const;
+
+	void SetUpSprite(SpriteComponent & spriteComp, EEnemy type);
 
 	const int mMaxEnemies = 1;
 	std::vector<GameObject *> mEnemyObjects;

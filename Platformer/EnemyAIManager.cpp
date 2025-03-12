@@ -50,7 +50,7 @@ void EnemyAIManager::Update(float deltaTime)
 	while (mEnemyObjects.size() < mMaxEnemies)
 	{
 		sf::Vector2f spawnPosition = sf::Vector2f(float(1183.723), float(851.008));
-		RespawnEnemy(EEnemy::Asteroid, spawnPosition);
+		RespawnEnemy(EEnemy::Tank, spawnPosition);
 	}
 }
 
@@ -69,7 +69,7 @@ sf::Vector2f EnemyAIManager::GetRandomSpawnPosition()
     const int screenWidth = windowSize.x;
     const int screenHeight = windowSize.y;
 
-    const float spawnOffset = 500.0f; // Increased offset for smoother appearance
+    const float spawnOffset = 500.0f;
 
     sf::Vector2f spawnPosition;
 
@@ -129,13 +129,9 @@ void EnemyAIManager::AddEnemies(int count, EEnemy type, sf::Vector2f pos)
         if (pSpriteComp)
         {
             {
-                std::string file = GetEnemyFile(type);
-                auto scale = sf::Vector2f(.08f, .08f);
-                ResourceId resourceId(file);
-                auto pTexture = gameManager.GetManager<ResourceManager>()->GetTexture(resourceId);
-
-                pSpriteComp->SetSprite(pTexture, scale);
+                SetUpSprite(*pSpriteComp, type);
                 pSpriteComp->SetPosition(pos);
+                pSpriteComp->SetOriginToCenter();
                 pEnemy->AddComponent(pSpriteComp);
             }
             {
@@ -158,9 +154,7 @@ void EnemyAIManager::AddEnemies(int count, EEnemy type, sf::Vector2f pos)
                 );
                 pEnemy->AddComponent(pCollisionComp);
             }
-            
         }
-        
     }
 }
 
@@ -216,6 +210,10 @@ std::string EnemyAIManager::GetEnemyFile(EEnemy type)
 		{
 			return "Art/Astroid.png";
 		}
+        case (EEnemy::Tank):
+        {
+            return "Art/Tanks/PNG/Hulls_Color_C/Hull_01.png";
+        }
 		default:
 		{
 			return "Art/Astroid.png";
@@ -275,6 +273,36 @@ EDropType EnemyAIManager::DetermineDropType() const
     }
 
     return EDropType::None;
+}
+
+//------------------------------------------------------------------------------------------------------------------------
+
+void EnemyAIManager::SetUpSprite(SpriteComponent & spriteComp, EEnemy type)
+{
+    std::string file = GetEnemyFile(type);
+    ResourceId resourceId(file);
+    auto pTexture = GetGameManager().GetManager<ResourceManager>()->GetTexture(resourceId);
+
+    auto scale = sf::Vector2f();
+    switch (type)
+    {
+        case (EEnemy::Asteroid):
+        {
+            scale = sf::Vector2f(.08f, .08f);
+            break;
+        }
+        case (EEnemy::Tank):
+        {
+            scale = sf::Vector2f(.2f, .2f);
+            break;
+        }
+        default :
+        {
+            scale = sf::Vector2f(1.f, 1.f);
+            break;
+        }
+    }
+    spriteComp.SetSprite(pTexture, scale);
 }
 
 //------------------------------------------------------------------------------------------------------------------------
