@@ -38,7 +38,6 @@ private:
 	sf::Sprite mSprite;
 	float mRotationSpeed;
 	float mCurrentRotation;
-	std::string mFile;
 	std::string mName;
 };
 

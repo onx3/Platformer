@@ -7,10 +7,9 @@
 
 enum class EEnemy
 {
-	Ship,
-	Ufo,
-	Asteroid,
-	Tank
+	TankBody,
+	TankGuns,
+	TankTracks
 };
 
 class EnemyAIManager : public BaseManager

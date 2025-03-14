@@ -58,6 +58,8 @@ void CameraManager::Update(float deltaTime)
 
 void CameraManager::OnGameEnd()
 {
+	auto & window = GetGameManager().GetWindow();
+	window.setView(window.getDefaultView());
 }
 
 //------------------------------------------------------------------------------------------------------------------------

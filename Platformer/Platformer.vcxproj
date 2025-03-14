@@ -156,6 +156,7 @@
     <ClCompile Include="DungeonManager.cpp" />
     <ClCompile Include="EnemyAIManager.cpp" />
     <ClCompile Include="ExplosionComponent.cpp" />
+    <ClCompile Include="FollowParentComponent.cpp" />
     <ClCompile Include="GameComponent.cpp" />
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="GameObject.cpp" />
@@ -174,6 +175,7 @@
     <ClCompile Include="ScoreManager.cpp" />
     <ClCompile Include="SpriteComponent.cpp" />
     <ClCompile Include="Timer.cpp" />
+    <ClCompile Include="TrackingComponent.cpp" />
     <ClCompile Include="WindowManager.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -192,6 +194,7 @@
     <ClInclude Include="DungeonManager.h" />
     <ClInclude Include="EnemyAIManager.h" />
     <ClInclude Include="ExplosionComponent.h" />
+    <ClInclude Include="FollowParentComponent.h" />
     <ClInclude Include="GameComponent.h" />
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="GameObject.h" />
@@ -204,6 +207,8 @@
     <ClInclude Include="ScoreManager.h" />
     <ClInclude Include="SpriteComponent.h" />
     <ClInclude Include="Timer.h" />
+    <ClInclude Include="TPool.h" />
+    <ClInclude Include="TrackingComponent.h" />
     <ClInclude Include="WindowManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

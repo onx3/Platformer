@@ -24,7 +24,6 @@ GameObject::GameObject(GameManager * pGameManager, ETeam team, GameObject * pPar
 
     auto spriteComp = std::make_shared<SpriteComponent>(this);
     AddComponent(spriteComp);
-    spriteComp->SetOriginToCenter();
 }
 
 //------------------------------------------------------------------------------------------------------------------------
@@ -288,22 +287,19 @@ std::vector<GameComponent *> GameObject::GetAllComponents()
 {
     std::vector<GameComponent *> components;
 
-    // Validate 'this' pointer
     if (!this)
     {
         return components;
     }
 
-    // Validate mComponents
-    if (mComponents.empty() && mComponents.size() > 0) // Corruption check
+    if (mComponents.empty() && mComponents.size() > 0)
     {
         return components;
     }
 
-    // Safe iteration
     for (const auto & [type, component] : mComponents)
     {
-        if (component) // Ensure the shared_ptr is not null
+        if (component)
         {
             components.push_back(component.get());
         }
@@ -323,7 +319,18 @@ void GameObject::Activate()
 
 void GameObject::Deactivate()
 {
+    NotifyChildrenToDeactivate();
     mActive = false;
+}
+
+//------------------------------------------------------------------------------------------------------------------------
+
+void GameObject::NotifyChildrenToDeactivate()
+{
+    for (auto * pChild : mChildGameObjects)
+    {
+        pChild->Deactivate();
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------

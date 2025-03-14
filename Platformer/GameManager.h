@@ -8,6 +8,7 @@
 #include "BaseManager.h"
 #include "WindowManager.h"
 #include "CollisionListener.h"
+#include "TPool.h"
 
 class BaseManager;
 struct ParallaxLayer
@@ -86,6 +87,7 @@ private:
 	bool mShowImGuiWindow;
 	std::vector<std::pair<std::type_index, BaseManager *>> mManagers;
 	GameObject * mpRootGameObject;
+	TPool<GameObject> mPool;
 
 	// Audio
 	sf::SoundBuffer mSoundBuffer;

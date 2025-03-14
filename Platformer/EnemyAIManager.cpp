@@ -12,9 +12,8 @@
 #include "DropManager.h"
 #include "ResourceManager.h"
 #include "AIPathComponent.h"
+#include "FollowParentComponent.h"
 
-
-Timer gTimers[3];
 EnemyAIManager::EnemyAIManager(GameManager * pGameManager)
 	: BaseManager(pGameManager)
 {
@@ -50,7 +49,7 @@ void EnemyAIManager::Update(float deltaTime)
 	while (mEnemyObjects.size() < mMaxEnemies)
 	{
 		sf::Vector2f spawnPosition = sf::Vector2f(float(1183.723), float(851.008));
-		RespawnEnemy(EEnemy::Tank, spawnPosition);
+		RespawnEnemy(EEnemy::TankBody, spawnPosition);
 	}
 }
 
@@ -131,8 +130,6 @@ void EnemyAIManager::AddEnemies(int count, EEnemy type, sf::Vector2f pos)
             {
                 SetUpSprite(*pSpriteComp, type);
                 pSpriteComp->SetPosition(pos);
-                pSpriteComp->SetOriginToCenter();
-                pEnemy->AddComponent(pSpriteComp);
             }
             {
                 // AI Path Movement
@@ -153,6 +150,19 @@ void EnemyAIManager::AddEnemies(int count, EEnemy type, sf::Vector2f pos)
                     true
                 );
                 pEnemy->AddComponent(pCollisionComp);
+            }
+            {
+                // Tank Logic
+                auto * pGunGameObject = pEnemy->GetGameManager().CreateNewGameObject(ETeam::Enemy, pEnemy);
+                auto pGunSpriteComp = pGunGameObject->GetComponent<SpriteComponent>().lock();
+                if (pGunSpriteComp)
+                {
+                    SetUpSprite(*pGunSpriteComp, EEnemy::TankGuns);
+                    pGunSpriteComp->SetPosition(pos);
+
+                    auto pFollowParentComponent = std::make_shared<FollowParentComponent>(pGunGameObject);
+                    pGunGameObject->AddComponent(pFollowParentComponent);
+                }
             }
         }
     }
@@ -198,21 +208,17 @@ std::string EnemyAIManager::GetEnemyFile(EEnemy type)
 {
 	switch (type)
 	{
-		case (EEnemy::Ship):
-		{
-			return "Art/EnemyShip.png";
-		}
-		case (EEnemy::Ufo):
-		{
-			return "Art/EnemyUFO.png";
-		}
-		case (EEnemy::Asteroid):
-		{
-			return "Art/Astroid.png";
-		}
-        case (EEnemy::Tank):
+        case (EEnemy::TankBody):
         {
             return "Art/Tanks/PNG/Hulls_Color_C/Hull_01.png";
+        }
+        case (EEnemy::TankGuns):
+        {
+            return "Art/Tanks/PNG/Weapon_Color_C/Gun_01.png";
+        }
+        case (EEnemy::TankTracks):
+        {
+            return "Art/Tanks/PNG/Tracks/Track_1_A.png";
         }
 		default:
 		{
@@ -286,12 +292,17 @@ void EnemyAIManager::SetUpSprite(SpriteComponent & spriteComp, EEnemy type)
     auto scale = sf::Vector2f();
     switch (type)
     {
-        case (EEnemy::Asteroid):
+        case (EEnemy::TankBody):
         {
-            scale = sf::Vector2f(.08f, .08f);
+            scale = sf::Vector2f(.2f, .2f);
             break;
         }
-        case (EEnemy::Tank):
+        case (EEnemy::TankGuns):
+        {
+            scale = sf::Vector2f(.2f, .2f);
+            break;
+        }
+        case (EEnemy::TankTracks):
         {
             scale = sf::Vector2f(.2f, .2f);
             break;

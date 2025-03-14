@@ -7,9 +7,9 @@ SpriteComponent::SpriteComponent(GameObject * pOwner)
     : GameComponent(pOwner)
     , mRotationSpeed(3.f)
     , mCurrentRotation(0.f)
-    , mFile()
     , mName("SpriteComponent")
 {
+    SetOriginToCenter();
 }
 
 //------------------------------------------------------------------------------------------------------------------------
@@ -22,7 +22,6 @@ SpriteComponent::~SpriteComponent()
 
 void SpriteComponent::SetSprite(std::shared_ptr<sf::Texture> pTexture, const sf::Vector2f & scale)
 {
-    
     if (pTexture)
     {
         mSprite.setTexture(*pTexture);
@@ -138,7 +137,7 @@ void SpriteComponent::draw(sf::RenderTarget & target, sf::RenderStates states)
 
 void SpriteComponent::DebugImGuiComponentInfo()
 {
-    ImGui::Text("File Path: %s", mFile.c_str());
+    
 }
 
 //------------------------------------------------------------------------------------------------------------------------

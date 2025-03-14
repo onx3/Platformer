@@ -102,6 +102,8 @@ protected:
     std::unordered_map<std::type_index, std::shared_ptr<GameComponent>> mComponents;
 
 private:
+    void NotifyChildrenToDeactivate();
+
     bool mIsDestroyed; // Used to know when GameManager can Delete
     bool mActive; // Used to know when the GameObject is dying
     GameManager * mpGameManager;

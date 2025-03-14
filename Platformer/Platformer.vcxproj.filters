@@ -121,6 +121,12 @@
     <ClCompile Include="AIPathComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="FollowParentComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="TrackingComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameManager.h">
@@ -206,6 +212,15 @@
     </ClInclude>
     <ClInclude Include="AIPathComponent.h">
       <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="FollowParentComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="TrackingComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="TPool.h">
+      <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
