@@ -22,6 +22,6 @@ public:
 	void SpawnDrop(EDropType dropType, const sf::Vector2f & position);
 
 private:
-	std::vector<GameObject *> mDropObjects;
+	std::vector<BD::Handle> mDropHandles;
 };
 

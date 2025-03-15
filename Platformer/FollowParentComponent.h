@@ -3,7 +3,7 @@
 class FollowParentComponent : public GameComponent
 {
 public:
-    FollowParentComponent(GameObject * pOwner);
+    FollowParentComponent(GameObject * pOwner, GameManager & gameManager);
     ~FollowParentComponent();
 
     virtual void Update(float deltaTime) override;

@@ -23,7 +23,7 @@ struct Node
 class AIPathComponent : public GameComponent
 {
 public:
-	AIPathComponent(GameObject * pGameObject);
+	AIPathComponent(GameObject * pGameObject, GameManager & gameManager);
 	~AIPathComponent();
 
 	virtual void Update(float deltaTime) override;

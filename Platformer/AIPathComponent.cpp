@@ -17,8 +17,8 @@ namespace
 
 //------------------------------------------------------------------------------------------------------------------------
 
-AIPathComponent::AIPathComponent(GameObject * pGameObject)
-    : GameComponent(pGameObject)
+AIPathComponent::AIPathComponent(GameObject * pGameObject, GameManager & gameManager)
+    : GameComponent(pGameObject, gameManager)
     , mName("AIPathComponent")
     , mPath()
     , mPathIndex(0)
@@ -42,8 +42,11 @@ AIPathComponent::~AIPathComponent()
 
 void AIPathComponent::Update(float deltaTime)
 {
-    auto * pPlayer = GetGameManager().GetManager<PlayerManager>()->GetPlayers()[0];
-    auto * pLevelManager = GetGameManager().GetManager<LevelManager>();
+    GameManager & gameManager = GetGameManager();
+    auto playerHandle = gameManager.GetManager<PlayerManager>()->GetPlayers()[0];
+    auto * pPlayer = gameManager.GetGameObject(playerHandle);
+    auto * pLevelManager = gameManager.GetManager<LevelManager>();
+
     if (!pPlayer || !pLevelManager)
     {
         return;

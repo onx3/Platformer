@@ -6,7 +6,7 @@
 
 namespace BD
 {
-	typedef unsigned long unit32;
+	typedef unsigned long uint32;
 	typedef unsigned long long uint64;
 	typedef uint64 Handle;
 }
@@ -15,6 +15,16 @@ template<class T, size_t MAX_SIZE = 1024>
 class TPool
 {
 public:
+	TPool()
+	{
+		for (BD::uint32 ii = 0; ii < MAX_SIZE; ++ii)
+		{
+			mFreeIndices.push(ii);
+		}
+	}
+
+	//------------------------------------------------------------------------------------------------------------------------
+
 	BD::Handle AddObject(T * obj)
 	{
 		if (mFreeIndices.empty())
@@ -27,23 +37,27 @@ public:
 
 		mStorage[index] = obj;
 		mIsOccupied.set(index);
-		mVersions[index]++; // Increment version to ensure stale handles are invalid
+		++mVersions[index];
 
 		return PackHandle(index, mVersions[index]);
 	}
+
+	//------------------------------------------------------------------------------------------------------------------------
 
 	T * Get(BD::Handle handle)
 	{
 		BD::uint32 index = ExtractIndex(handle);
 		BD::uint32 version = ExtractVersion(handle);
 
-		if (index >= MAX_SIZE || !mIsOccupied.test(index) || mVersions[index] != version)
+		if (index >= MAX_SIZE || !mIsOccupied.test(index) || mVersions[index] != version || !mStorage[index])
 		{
-			return nullptr; // Invalid handle or object no longer exists
+			return nullptr;
 		}
 
 		return mStorage[index];
 	}
+
+	//------------------------------------------------------------------------------------------------------------------------
 
 	void Remove(BD::Handle handle)
 	{
@@ -52,34 +66,43 @@ public:
 
 		if (index >= MAX_SIZE || !mIsOccupied.test(index) || mVersions[index] != version)
 		{
-			return; // Prevent double-free or invalid removal
+			return;
 		}
 
 		delete mStorage[index];
 		mStorage[index] = nullptr;
 		mIsOccupied.reset(index);
+		++mVersions[index];
 		mFreeIndices.push(index);
 	}
 
+	//------------------------------------------------------------------------------------------------------------------------
+
 private:
 
-	inline Handle PackHandle(uint32 index, uint32 version)
+	inline BD::Handle PackHandle(uint32 index, uint32 version)
 	{
-		return (static_cast<Handle>(version) << 32) | index;
+		return (static_cast<BD::Handle>(version) << 32) | index;
 	}
 
-	inline uint32 ExtractIndex(Handle handle)
+	//------------------------------------------------------------------------------------------------------------------------
+
+	inline uint32 ExtractIndex(BD::Handle handle)
 	{
 		return static_cast<uint32>(handle & 0xFFFFFFFF);
 	}
 
-	inline uint32 ExtractVersion(Handle handle)
+	//------------------------------------------------------------------------------------------------------------------------
+
+	inline uint32 ExtractVersion(BD::Handle handle)
 	{
 		return static_cast<uint32>((handle >> 32) & 0xFFFFFFFF);
 	}
 
-	T * mStorage[MAX_SIZE] = { nullptr };
-	std::bitset<MAX_SIZE> mIsOccupied; // Fast lookup of allocated objects
-	BD::uint32 mVersions[MAX_SIZE] = { 0 }; // Tracks version numbers
-	std::stack<BD::uint32> mFreeIndices; // Stores available indices
+	//------------------------------------------------------------------------------------------------------------------------
+
+	T * mStorage[MAX_SIZE] = { nullptr }; // Stores pointers to objects
+	std::bitset<MAX_SIZE> mIsOccupied; // Tracks which slots are in use
+	BD::uint32 mVersions[MAX_SIZE] = { 0 }; // Stores version numbers for handles
+	std::stack<BD::uint32> mFreeIndices; // Stores available indices for allocation
 };

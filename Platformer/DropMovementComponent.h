@@ -4,7 +4,7 @@
 class DropMovementComponent : public GameComponent
 {
 public:
-	DropMovementComponent(GameObject * pGameOwner);
+	DropMovementComponent(GameObject * pGameOwner, GameManager & gameManager);
 
 	virtual void Update(float deltaTime) override;
 	virtual void DebugImGuiComponentInfo() override;

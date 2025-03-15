@@ -5,8 +5,8 @@
 #include "GameObject.h"
 #include "SpriteComponent.h"
 
-ExplosionComponent::ExplosionComponent(GameObject * pOwner, const std::string & spriteSheetPath, int frameWidth, int frameHeight, int numFrames, float frameTime, sf::Vector2f scale, sf::Vector2f pos)
-    : GameComponent(pOwner)
+ExplosionComponent::ExplosionComponent(GameObject * pOwner, GameManager & gameManager, const std::string & spriteSheetPath, int frameWidth, int frameHeight, int numFrames, float frameTime, sf::Vector2f scale, sf::Vector2f pos)
+    : GameComponent(pOwner, gameManager)
     , mFrameWidth(frameWidth)
     , mFrameHeight(frameHeight)
     , mNumFrames(numFrames)
@@ -21,7 +21,7 @@ ExplosionComponent::ExplosionComponent(GameObject * pOwner, const std::string & 
     std::string file = spriteSheetPath;
     ResourceId resourceId(file);
 
-    auto pTexture = mpOwner->GetGameManager().GetManager<ResourceManager>()->GetTexture(resourceId);
+    auto pTexture = GetGameManager().GetManager<ResourceManager>()->GetTexture(resourceId);
     if (pTexture)
     {
         mTexture = *pTexture;

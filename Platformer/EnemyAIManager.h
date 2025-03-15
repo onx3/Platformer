@@ -5,6 +5,11 @@
 #include "DropManager.h"
 #include "SpriteComponent.h"
 
+namespace
+{
+	const int mkMaxEnemies = 1;
+}
+
 enum class EEnemy
 {
 	TankBody,
@@ -27,7 +32,7 @@ public:
 	void AddEnemies(int count, EEnemy type, sf::Vector2f pos);
 	void DestroyAllEnemies();
 
-	const std::vector<GameObject *> & GetEnemies() const;
+	const std::vector<BD::Handle> & GetEnemies() const;
 
 	void OnDeath(GameObject * pEnemy);
 
@@ -41,8 +46,7 @@ private:
 
 	void SetUpSprite(SpriteComponent & spriteComp, EEnemy type);
 
-	const int mMaxEnemies = 1;
-	std::vector<GameObject *> mEnemyObjects;
+	std::vector<BD::Handle> mEnemyHandles;
 };
 
 //------------------------------------------------------------------------------------------------------------------------

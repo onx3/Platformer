@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include "box2d/box2d.h"
+#include "TPool.h"
 
 class GameComponent;
 class GameManager;
@@ -23,6 +24,8 @@ enum class ETeam
 class GameObject : public sf::Drawable
 {
 public:
+    ~GameObject();
+
     void Destroy();
     bool IsDestroyed() const;
 
@@ -76,12 +79,16 @@ public:
 
     void AddChild(GameObject * pChild);
     void RemoveChild(GameObject * pChild);
-    std::vector<GameObject *> & GetChildren();
+    void GetChildren(std::vector<GameObject *> & childObjs);
+    std::vector<BD::Handle> & GetChildrenHandles();
 
     GameObject * GetParent() const;
-    void SetParent(GameObject * pParent);
+    BD::Handle GetParentHandle();
+    void SetParent(BD::Handle parentHandle);
 
     std::vector<GameComponent *> GetAllComponents();
+
+    BD::Handle GetHandle() const;
 
     void Activate();
     void Deactivate();
@@ -92,8 +99,7 @@ public:
     const float PIXELS_PER_METER = 100.f;
 
 protected:
-    GameObject(GameManager * pGameManager, ETeam team, GameObject * pParent = nullptr);
-    ~GameObject();
+    GameObject(GameManager * pGameManager, ETeam team, BD::Handle handle, BD::Handle parentHandle = BD::Handle(0));
 
     void CleanUpChildren();
 
@@ -104,12 +110,13 @@ protected:
 private:
     void NotifyChildrenToDeactivate();
 
-    bool mIsDestroyed; // Used to know when GameManager can Delete
+    bool mIsDestroyed; // Used to know when GameManager can remove from pool
     bool mActive; // Used to know when the GameObject is dying
     GameManager * mpGameManager;
     ETeam mTeam;
-    std::vector<GameObject *> mChildGameObjects;
-    GameObject * mpParent;
+    std::vector<BD::Handle> mChildHandles;
+    BD::Handle mHandle;
+    BD::Handle mParentHandle;
     b2Body * mpPhysicsBody;
 
     friend class GameManager;

@@ -2,8 +2,9 @@
 #include "GameComponent.h"
 #include "BDConfig.h"
 
-GameComponent::GameComponent(GameObject * pOwner)
-    : mpOwner(pOwner)
+GameComponent::GameComponent(GameObject * pOwner, GameManager & gameManager)
+    : mOwnerHandle(pOwner->GetHandle())
+    , mGameManager(gameManager)
     , mName("GameComponent")
 {
 }
@@ -12,23 +13,23 @@ GameComponent::GameComponent(GameObject * pOwner)
 
 void GameComponent::SetOwner(GameObject * pOwner)
 {
-    mpOwner = pOwner;
+    mOwnerHandle = pOwner->GetHandle();
 }
 
 //------------------------------------------------------------------------------------------------------------------------
 
 GameObject & GameComponent::GetGameObject() const
 {
-    assert(mpOwner && "mpOwner is nullptr!");
-    return *mpOwner;
+    auto * pOwner = GetGameManager().GetGameObject(mOwnerHandle);
+    assert(pOwner && "mpOwner is nullptr!");
+    return *pOwner;
 }
 
 //------------------------------------------------------------------------------------------------------------------------
 
 GameManager & GameComponent::GetGameManager() const
 {
-    assert(mpOwner && "mpOwner is nullptr!");
-    return mpOwner->GetGameManager();
+    return mGameManager;
 }
 
 //------------------------------------------------------------------------------------------------------------------------

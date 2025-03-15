@@ -8,8 +8,8 @@
 #include <cmath>
 #include "imgui.h"
 
-HealthComponent::HealthComponent(GameObject * pOwner, int initialHealth, int maxHealth, int lifeCount, int maxLives, float hitCooldown)
-    : GameComponent(pOwner)
+HealthComponent::HealthComponent(GameObject * pOwner, GameManager & gameManager, int initialHealth, int maxHealth, int lifeCount, int maxLives, float hitCooldown)
+    : GameComponent(pOwner, gameManager)
     , mHealth(initialHealth)
     , mMaxHealth(maxHealth)
     , mLifeCount(lifeCount)
@@ -121,6 +121,12 @@ void HealthComponent::LoseLife()
 
 void HealthComponent::Update(float deltaTime)
 {
+    GameObject * pOwner = GetGameManager().GetGameObject(mOwnerHandle);
+    if (!pOwner)
+    {
+        return;
+    }
+
     // Increment time since last hit
     mTimeSinceLastHit += deltaTime;
 
@@ -128,7 +134,7 @@ void HealthComponent::Update(float deltaTime)
     {
         if (mLifeCount <= 1)
         {
-            mpOwner->Deactivate();
+            pOwner->Deactivate();
         }
         else
         {
@@ -137,13 +143,13 @@ void HealthComponent::Update(float deltaTime)
         LoseLife();
     }
 
-    if (mpOwner->IsDestroyed())
+    if (pOwner->IsDestroyed())
     {
         return;
     }
 
     // Handle invincibility flickering effect
-    auto pSpriteComp = mpOwner->GetComponent<SpriteComponent>().lock();
+    auto pSpriteComp = pOwner->GetComponent<SpriteComponent>().lock();
     if (pSpriteComp)
     {
         if (mTimeSinceLastHit < mHitCooldown)

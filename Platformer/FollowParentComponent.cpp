@@ -1,8 +1,8 @@
 #include "AstroidsPrivate.h"
 #include "FollowParentComponent.h"
 
-FollowParentComponent::FollowParentComponent(GameObject * pOwner)
-	: GameComponent(pOwner)
+FollowParentComponent::FollowParentComponent(GameObject * pOwner, GameManager & gameManager)
+	: GameComponent(pOwner, gameManager)
 	, mName("FollowParentComponent")
 {
 

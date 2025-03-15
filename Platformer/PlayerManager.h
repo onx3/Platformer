@@ -16,10 +16,10 @@ public:
 
     void OnPlayerDeath(GameObject * pPlayer);
 
-    const std::vector<GameObject *> & GetPlayers() const;
+    const std::vector<BD::Handle> & GetPlayers() const;
 
 private:
-    std::vector<GameObject *> mPlayerObjects;
+    std::vector<BD::Handle> mPlayerHandles;
 
     // Audio
     sf::SoundBuffer mLoseLifeSoundBuffer;

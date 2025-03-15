@@ -13,8 +13,8 @@
 #include "CameraManager.h"
 #include "imgui.h"
 
-ProjectileComponent::ProjectileComponent(GameObject * pOwner)
-	: GameComponent(pOwner)
+ProjectileComponent::ProjectileComponent(GameObject * pOwner, GameManager & gameManager)
+	: GameComponent(pOwner, gameManager)
 	, mProjectiles()
 	, mSpeed(700.f)
 	, mCooldown(.2f)
@@ -51,20 +51,28 @@ std::string ProjectileComponent::GetCorrectProjectileFile()
 
 void ProjectileComponent::Shoot()
 {
-	auto * pProjectile = mpOwner->GetGameManager().CreateNewGameObject(ETeam::Friendly, mpOwner);
+	GameManager & gameManager = GetGameManager();
+	BD::Handle projectileHandle = gameManager.CreateNewGameObject(ETeam::Friendly, mOwnerHandle);
+	GameObject * pProjectile = gameManager.GetGameObject(projectileHandle);
+	GameObject * pOwnerGameObj = gameManager.GetGameObject(mOwnerHandle);
+
+	if (!pProjectile || !pOwnerGameObj)
+	{
+		return;
+	}
 
 	auto pProjectileSpriteComponent = pProjectile->GetComponent<SpriteComponent>().lock();
 	if (pProjectileSpriteComponent)
 	{
 		auto file = GetCorrectProjectileFile();
 		ResourceId resourceId(file);
-		auto pTexture = mpOwner->GetGameManager().GetManager<ResourceManager>()->GetTexture(resourceId);
+		auto pTexture = GetGameManager().GetManager<ResourceManager>()->GetTexture(resourceId);
 
 		pProjectileSpriteComponent->SetSprite(pTexture, sf::Vector2f(1.05f, 1.05f));
 
 		// Get ship's position, size
-		sf::Vector2f playerPosition = mpOwner->GetPosition();
-		sf::Vector2f playerSize = mpOwner->GetSize();
+		sf::Vector2f playerPosition = pOwnerGameObj->GetPosition();
+		sf::Vector2f playerSize = pOwnerGameObj->GetSize();
 
 		// Calculate edge offset
 		sf::Vector2f offset;
@@ -95,16 +103,17 @@ void ProjectileComponent::Shoot()
 		pProjectileSpriteComponent->SetRotation(angleDegrees + 90.f); // Adjust rotation for sprite alignment
 
 		// Add collision
-		pProjectile->CreatePhysicsBody(&mpOwner->GetGameManager().GetPhysicsWorld(), pProjectile->GetSize(), true);
+		pProjectile->CreatePhysicsBody(&pOwnerGameObj->GetGameManager().GetPhysicsWorld(), pProjectile->GetSize(), true);
 		auto pCollisionComponent = std::make_shared<CollisionComponent>(
 			pProjectile,
-			&mpOwner->GetGameManager().GetPhysicsWorld(),
+			gameManager,
+			&pOwnerGameObj->GetGameManager().GetPhysicsWorld(),
 			pProjectile->GetPhysicsBody(),
             pProjectile->GetSize(), 
             true
         );
 		pProjectile->AddComponent(pCollisionComponent);
-		mProjectiles.push_back({ pProjectile, 3.f, 15, direction });
+		mProjectiles.push_back({ projectileHandle, 3.f, 15, direction });
 	}
 }
 
@@ -112,13 +121,17 @@ void ProjectileComponent::Shoot()
 
 void ProjectileComponent::Update(float deltaTime)
 {
-	if (!mpOwner) return;
+	GameObject * pOwner = GetGameManager().GetGameObject(mOwnerHandle);
+	if (!pOwner)
+	{
+		return;
+	}
 
 	mTimeSinceLastShot += deltaTime;
 
 	if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && mTimeSinceLastShot >= mCooldown)
 	{
-		float rotationInDegrees = mpOwner->GetRotation();
+		float rotationInDegrees = pOwner->GetRotation();
 		float rotationInRadians = rotationInDegrees * (3.14159f / 180.0f);
 
 		sf::Vector2f direction(std::sin(rotationInRadians), -std::cos(rotationInRadians));
@@ -159,13 +172,16 @@ std::string & ProjectileComponent::GetClassName()
 
 void ProjectileComponent::UpdateProjectiles(float deltaTime)
 {
+	auto & gameManager = GetGameManager();
+
 	for (auto & projectile : mProjectiles)
 	{
-		if (projectile.pObject && !projectile.pObject->IsDestroyed())
+		GameObject * pProjectile = gameManager.GetGameObject(projectile.handle);
+		if (pProjectile && !pProjectile->IsDestroyed())
 		{
-			sf::Vector2f currentPosition = projectile.pObject->GetPosition();
+			sf::Vector2f currentPosition = pProjectile->GetPosition();
 			sf::Vector2f newPosition = currentPosition + (projectile.direction * mSpeed * deltaTime);
-			projectile.pObject->SetPosition(newPosition);
+			pProjectile->SetPosition(newPosition);
 
 			projectile.lifespan -= deltaTime;
 		}
@@ -173,13 +189,13 @@ void ProjectileComponent::UpdateProjectiles(float deltaTime)
 
 	mProjectiles.erase(
 		std::remove_if(mProjectiles.begin(), mProjectiles.end(),
-			[](Projectile & proj) {
-				if (proj.pObject && !proj.pObject->IsDestroyed() && proj.lifespan <= 0.0f)
+			[&gameManager](Projectile & proj) {
+				GameObject * pProjectile = gameManager.GetGameObject(proj.handle);
+				if (pProjectile && !pProjectile->IsDestroyed() && proj.lifespan <= 0.0f)
 				{
-					proj.pObject->Destroy(); // Destroy the object if its lifespan is over
+					pProjectile->Destroy();
 				}
-				// Remove if the object is destroyed or lifespan is exhausted
-				return !proj.pObject || proj.pObject->IsDestroyed();
+				return !pProjectile || pProjectile->IsDestroyed();
 			}),
 		mProjectiles.end());
 }

@@ -22,7 +22,7 @@ GameManager::GameManager(WindowManager & windowManager)
     , mpWindow(windowManager.GetWindow())
     , mEvent(windowManager.GetEvent())
     , mShowImGuiWindow(false)
-    , mpRootGameObject(nullptr)
+    , mRootHandle()
     , mManagers()
     , mSoundPlayed(false)
     , mIsGameOver(false)
@@ -36,7 +36,7 @@ GameManager::GameManager(WindowManager & windowManager)
 
         InitWindow();
         InitImGui();
-        mpRootGameObject = new GameObject(this, ETeam::Neutral);
+        mRootHandle = CreateNewGameObject(ETeam::Neutral, BD::Handle(0));
 
         AddManager<PlayerManager>();
 
@@ -120,12 +120,11 @@ void GameManager::EndGame()
         }
     }
 
-    // Cleanup all game objects starting from the root
-    if (mpRootGameObject)
+    if (mRootHandle != BD::Handle(0))
     {
-        CleanUpDestroyedGameObjects(mpRootGameObject);
-        delete mpRootGameObject;
-        mpRootGameObject = nullptr;
+        CleanUpDestroyedGameObjects(mRootHandle);
+        mPool.Remove(mRootHandle);
+        mRootHandle = BD::Handle(0);
     }
 
     mPhysicsWorld.ClearForces();
@@ -188,11 +187,11 @@ void GameManager::DebugUpdate(float deltaTime)
 
 void GameManager::UpdateGameObjects(float deltaTime)
 {
-    if (mpRootGameObject)
+    if (auto * pRootObj = GetGameObject(mRootHandle))
     {
-        mpRootGameObject->Update(deltaTime);
-        CleanUpDestroyedGameObjects(mpRootGameObject);
-        if (!mpRootGameObject)
+        pRootObj->Update(deltaTime);
+        CleanUpDestroyedGameObjects(mRootHandle);
+        if (!pRootObj)
         {
             EndGame();
         }
@@ -201,38 +200,50 @@ void GameManager::UpdateGameObjects(float deltaTime)
 
 //------------------------------------------------------------------------------------------------------------------------
 
-void GameManager::CleanUpDestroyedGameObjects(GameObject * pRoot)
+void GameManager::CleanUpDestroyedGameObjects(BD::Handle rootHandle)
 {
-    if (!pRoot)
+    GameObject * pRoot = GetGameObject(rootHandle);
+    if (!pRoot) return;
+
+    std::vector<BD::Handle> objectsToDelete;
+
+    // Copy the child handles to avoid modifying while iterating
+    std::vector<BD::Handle> children = pRoot->GetChildrenHandles();
+
+    for (BD::Handle childHandle : children)
     {
-        return;
-    }
+        CleanUpDestroyedGameObjects(childHandle);
 
-    auto & children = pRoot->GetChildren();
-    std::vector<GameObject *> objectsToDelete;
-
-    for (int i = static_cast<int>(children.size()) - 1; i >= 0; --i)
-    {
-        GameObject * pChild = children[i];
-
-        CleanUpDestroyedGameObjects(pChild);
-
-        // Collect destroyed objects
+        GameObject * pChild = GetGameObject(childHandle);
         if (pChild && pChild->IsDestroyed())
         {
-            objectsToDelete.push_back(pChild);
+            objectsToDelete.push_back(childHandle);
         }
     }
 
-    // Notify and delete in bulk
-    for (GameObject * pObject : objectsToDelete)
+    // Remove parent reference before deleting
+    if (pRoot->IsDestroyed())
     {
-        pObject->NotifyParentOfDeletion(); // Notify parent
-        delete pObject;                    // Delete object
-        pObject = nullptr;
+        BD::Handle parentHandle = pRoot->GetParentHandle();
+        if (parentHandle != BD::Handle(0))
+        {
+            GameObject * pParent = GetGameObject(parentHandle);
+            if (pParent)
+            {
+                auto & children = pParent->GetChildrenHandles();
+                children.erase(std::remove(children.begin(), children.end(), rootHandle), children.end());
+            }
+        }
+
+        objectsToDelete.push_back(rootHandle);
+    }
+
+    // Delete all objects marked for deletion
+    for (BD::Handle handle : objectsToDelete)
+    {
+        mPool.Remove(handle);
     }
 }
-
 
 //------------------------------------------------------------------------------------------------------------------------
 
@@ -246,7 +257,7 @@ void GameManager::RenderImGui()
         mShowImGuiWindow = true;
     }
 
-    if (mShowImGuiWindow && mpRootGameObject)
+    if (mShowImGuiWindow && GetGameObject(mRootHandle))
     {
         ImGui::Begin("Game Objects", &mShowImGuiWindow, ImGuiWindowFlags_NoCollapse);
 
@@ -257,7 +268,7 @@ void GameManager::RenderImGui()
         ImGui::Separator();
 
         std::stack<std::pair<GameObject *, int>> stack; // GameObject* + Depth
-        stack.push({ mpRootGameObject, 0 });
+        stack.push({ GetGameObject(mRootHandle), 0 });
 
         while (!stack.empty())
         {
@@ -275,7 +286,9 @@ void GameManager::RenderImGui()
                 pSelectedGameObject = pGameObject;
             }
 
-            for (auto * child : pGameObject->GetChildren())
+            std::vector<GameObject *> childObjs;
+            pGameObject->GetChildren(childObjs);
+            for (auto * child : childObjs)
             {
                 stack.push({ child, depth + 1 });
             }
@@ -336,9 +349,9 @@ void GameManager::Render(float deltaTime)
 
         mpWindow->setMouseCursorVisible(mShowImGuiWindow);
 
-        if (mpRootGameObject)
+        if (auto * pRoot = GetGameObject(mRootHandle))
         {
-            mpWindow->draw(*mpRootGameObject);
+            mpWindow->draw(*pRoot);
         }
     }
 
@@ -384,17 +397,50 @@ void GameManager::AddManager(Args&&... args)
 
 //------------------------------------------------------------------------------------------------------------------------
 
-GameObject * GameManager::CreateNewGameObject(ETeam team, GameObject * pParent)
+BD::Handle GameManager::CreateNewGameObject(ETeam team, BD::Handle parentHandle)
 {
-    GameObject * pGameObj = new GameObject(this, team, pParent);
-    return pGameObj;
+    GameObject * pNewObject = new GameObject(this, team, BD::Handle(0), parentHandle);
+    BD::Handle newHandle = mPool.AddObject(pNewObject);
+
+    pNewObject->mHandle = newHandle;
+
+    if (auto * pParent = GetGameObject(parentHandle))
+    {
+        pParent->AddChild(pNewObject);
+    }
+
+    auto spriteComp = std::make_shared<SpriteComponent>(pNewObject, *this);
+    pNewObject->AddComponent(spriteComp);
+
+    return newHandle;
+}
+
+//------------------------------------------------------------------------------------------------------------------------
+
+GameObject * GameManager::GetGameObject(BD::Handle handle)
+{
+    return mPool.Get(handle);
+}
+
+//------------------------------------------------------------------------------------------------------------------------
+
+void GameManager::RemoveGameObject(BD::Handle handle)
+{
+    mPool.Remove(handle);
 }
 
 //------------------------------------------------------------------------------------------------------------------------
 
 GameObject * GameManager::GetRootGameObject()
 {
-    return mpRootGameObject;
+    return GetGameObject(mRootHandle);
+}
+
+//------------------------------------------------------------------------------------------------------------------------
+
+BD::Handle GameManager::GetRootGameObjectHandle()
+{
+    return mRootHandle;
 }
 
 //------------------------------------------------------------------------------------------------------------------------
@@ -428,34 +474,40 @@ sf::RenderWindow & GameManager::GetWindow()
 
 //------------------------------------------------------------------------------------------------------------------------
 
-std::vector<GameObject *> GameManager::GetGameObjectsByTeam(ETeam team)
+std::vector<BD::Handle> GameManager::GetGameObjectsByTeam(ETeam team)
 {
-    std::vector<GameObject *> gameObjects;
-    if (!mpRootGameObject)
+    std::vector<BD::Handle> gameObjectHandles;
+    GameObject * pRoot = GetGameObject(mRootHandle);
+
+    if (!pRoot)
     {
-        return gameObjects;
+        return gameObjectHandles;
     }
 
-    std::stack<GameObject *> stack;
-    stack.push(mpRootGameObject);
+    std::stack<BD::Handle> stack;
+    stack.push(mRootHandle);
 
     while (!stack.empty())
     {
-        GameObject * pCurrent = stack.top();
+        BD::Handle currentHandle = stack.top();
         stack.pop();
 
-        if (pCurrent && !pCurrent->IsDestroyed() && pCurrent->GetTeam() == team)
+        GameObject * pCurrent = GetGameObject(currentHandle);
+        if (pCurrent)
         {
-            gameObjects.push_back(pCurrent);
-        }
-
-        for (GameObject * pChild : pCurrent->GetChildren())
-        {
-            stack.push(pChild);
+            if (!pCurrent->IsDestroyed() && pCurrent->GetTeam() == team)
+            {
+                gameObjectHandles.push_back(currentHandle);
+            }
+            auto & childHandles = pCurrent->GetChildrenHandles();
+            for (BD::Handle childHandle : childHandles)
+            {
+                stack.push(childHandle);
+            }
         }
     }
-    
-    return gameObjects;
+
+    return gameObjectHandles;
 }
 
 //------------------------------------------------------------------------------------------------------------------------

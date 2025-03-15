@@ -6,7 +6,7 @@ class GameManager;
 class GameComponent
 {
 public:
-    explicit GameComponent(GameObject * pOwner);
+    explicit GameComponent(GameObject * pOwner, GameManager & gameManager);
     virtual ~GameComponent() = default;
 
     void SetOwner(GameObject * pOwner);
@@ -20,7 +20,8 @@ public:
     virtual std::string & GetClassName();
 
 protected:
-    GameObject * mpOwner = nullptr;
+    BD::Handle mOwnerHandle;
+    GameManager & mGameManager;
 private:
     std::string mName;
 };

@@ -52,9 +52,14 @@ public:
 		return nullptr;
 	}
 
-	GameObject * CreateNewGameObject(ETeam team, GameObject * pParent);
+	BD::Handle CreateNewGameObject(ETeam team, BD::Handle parentHandle);
+
+	GameObject * GetGameObject(BD::Handle handle);
+
+	void RemoveGameObject(BD::Handle handle);
 
 	GameObject * GetRootGameObject();
+	BD::Handle GetRootGameObjectHandle();
 
 	bool IsGameOver() const;
 
@@ -64,7 +69,7 @@ public:
 
 	sf::RenderWindow & GetWindow();
 
-	std::vector<GameObject *> GetGameObjectsByTeam(ETeam team);
+	std::vector<BD::Handle> GetGameObjectsByTeam(ETeam team);
 
 	// Window
 	WindowManager & mWindowManager;
@@ -72,7 +77,7 @@ public:
 
 private:
 
-	void CleanUpDestroyedGameObjects(GameObject * pRoot);
+	void CleanUpDestroyedGameObjects(BD::Handle rootHandle);
 
 	void RenderImGui();
 
@@ -86,7 +91,7 @@ private:
 
 	bool mShowImGuiWindow;
 	std::vector<std::pair<std::type_index, BaseManager *>> mManagers;
-	GameObject * mpRootGameObject;
+	BD::Handle mRootHandle;
 	TPool<GameObject> mPool;
 
 	// Audio

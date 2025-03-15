@@ -5,7 +5,7 @@
 class CollisionComponent : public GameComponent
 {
 public:
-    CollisionComponent(GameObject * pOwner, b2World * pWorld, b2Body * pBody, sf::Vector2f size, bool isDynamic);
+    CollisionComponent(GameObject * pOwner, GameManager & gameManager, b2World * pWorld, b2Body * pBody, sf::Vector2f size, bool isDynamic);
     ~CollisionComponent();
 
     virtual void Update(float deltaTime) override;

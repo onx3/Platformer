@@ -14,6 +14,7 @@ static int sPlayerHealth = 100;
 
 PlayerManager::PlayerManager(GameManager * pGameManager)
     : BaseManager(pGameManager)
+    , mPlayerHandles()
     , mSoundPlayed(false)
 {
     InitPlayer();
@@ -41,7 +42,10 @@ PlayerManager::~PlayerManager()
 void PlayerManager::InitPlayer()
 {
     auto & gameManager = GetGameManager();
-    auto * pPlayer = gameManager.CreateNewGameObject(ETeam::Player, gameManager.GetRootGameObject());
+    BD::Handle playerHandle = gameManager.CreateNewGameObject(ETeam::Player, gameManager.GetRootGameObjectHandle());
+    GameObject * pPlayer = gameManager.GetGameObject(playerHandle);
+
+    mPlayerHandles.push_back(playerHandle);
 
     // Sprite Component
     {
@@ -68,7 +72,7 @@ void PlayerManager::InitPlayer()
         auto pMovementComponent = pPlayer->GetComponent<ControlledMovementComponent>().lock();
         if (!pMovementComponent)
         {
-            auto pMovementComponent = std::make_shared<ControlledMovementComponent>(pPlayer);
+            auto pMovementComponent = std::make_shared<ControlledMovementComponent>(pPlayer, gameManager);
             pPlayer->AddComponent(pMovementComponent);
         }
     }
@@ -78,7 +82,7 @@ void PlayerManager::InitPlayer()
         auto pProjectileComponent = pPlayer->GetComponent<ProjectileComponent>().lock();
         if (!pProjectileComponent)
         {
-            pPlayer->AddComponent(std::make_shared<ProjectileComponent>(pPlayer));
+            pPlayer->AddComponent(std::make_shared<ProjectileComponent>(pPlayer, gameManager));
         }
     }
 
@@ -87,7 +91,7 @@ void PlayerManager::InitPlayer()
         auto pHealthComponent = pPlayer->GetComponent<HealthComponent>().lock();
         if (!pHealthComponent)
         {
-            pPlayer->AddComponent(std::make_shared<HealthComponent>(pPlayer, sPlayerHealth, sPlayerHealth, 3, 3, 2.f));
+            pPlayer->AddComponent(std::make_shared<HealthComponent>(pPlayer, gameManager, sPlayerHealth, sPlayerHealth, 3, 3, 2.f));
         }
     }
 
@@ -99,6 +103,7 @@ void PlayerManager::InitPlayer()
             pPlayer->CreatePhysicsBody(&gameManager.GetPhysicsWorld(), pPlayer->GetSize(), true);
             pPlayer->AddComponent(std::make_shared<CollisionComponent>(
                 pPlayer,
+                gameManager,
                 &gameManager.GetPhysicsWorld(),
                 pPlayer->GetPhysicsBody(),
                 pPlayer->GetSize(),
@@ -113,16 +118,18 @@ void PlayerManager::InitPlayer()
 void PlayerManager::Update(float deltaTime)
 {
     auto & gameManager = GetGameManager();
-    mPlayerObjects = gameManager.GetGameObjectsByTeam(ETeam::Player);
+    mPlayerHandles = gameManager.GetGameObjectsByTeam(ETeam::Player);
 
-    if (mPlayerObjects.empty())
+    if (mPlayerHandles.empty())
     {
         gameManager.EndGame();
     }
     else
     {
-        for (auto * pPlayer : mPlayerObjects)
+        for (auto playerHandle : mPlayerHandles)
         {
+            GameObject * pPlayer = gameManager.GetGameObject(playerHandle);
+
             // Destroy the player after the explosion animation finishes
             auto explosionComp = pPlayer->GetComponent<ExplosionComponent>().lock();
             if (explosionComp && explosionComp->IsAnimationFinished())
@@ -172,7 +179,7 @@ void PlayerManager::Update(float deltaTime)
 
 void PlayerManager::OnGameEnd()
 {
-    mPlayerObjects.clear();
+    mPlayerHandles.clear();
 }
 
 //------------------------------------------------------------------------------------------------------------------------
@@ -199,16 +206,16 @@ void PlayerManager::OnPlayerDeath(GameObject * pPlayer)
     if (!pPlayer->GetComponent<ExplosionComponent>().lock())
     {
         auto explosionComp = std::make_shared<ExplosionComponent>(
-            pPlayer, "Art/explosion.png", 32, 32, 7, 0.1f, sf::Vector2f(2.f, 2.f), pPlayer->GetPosition());
+            pPlayer, GetGameManager(), "Art/explosion.png", 32, 32, 7, 0.1f, sf::Vector2f(2.f, 2.f), pPlayer->GetPosition());
         pPlayer->AddComponent(explosionComp);
     }
 }
 
 //------------------------------------------------------------------------------------------------------------------------
 
-const std::vector<GameObject *> & PlayerManager::GetPlayers() const
+const std::vector<BD::Handle> & PlayerManager::GetPlayers() const
 {
-    return mPlayerObjects;
+    return mPlayerHandles;
 }
 
 //------------------------------------------------------------------------------------------------------------------------

@@ -79,9 +79,6 @@
     <ClCompile Include="ProjectileComponent.cpp">
       <Filter>Components</Filter>
     </ClCompile>
-    <ClCompile Include="RandomMovementComponent.cpp">
-      <Filter>Components</Filter>
-    </ClCompile>
     <ClCompile Include="SpriteComponent.cpp">
       <Filter>Components</Filter>
     </ClCompile>
@@ -109,22 +106,16 @@
     <ClCompile Include="CameraManager.cpp">
       <Filter>Managers</Filter>
     </ClCompile>
-    <ClCompile Include="BulletComponent.cpp">
-      <Filter>Components</Filter>
-    </ClCompile>
-    <ClCompile Include="BulletPoolManager.cpp">
-      <Filter>Managers</Filter>
-    </ClCompile>
     <ClCompile Include="LevelManager.cpp">
       <Filter>Managers</Filter>
-    </ClCompile>
-    <ClCompile Include="AIPathComponent.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="FollowParentComponent.cpp">
       <Filter>Components</Filter>
     </ClCompile>
     <ClCompile Include="TrackingComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="AIPathComponent.cpp">
       <Filter>Components</Filter>
     </ClCompile>
   </ItemGroup>
@@ -183,9 +174,6 @@
     <ClInclude Include="ProjectileComponent.h">
       <Filter>Components</Filter>
     </ClInclude>
-    <ClInclude Include="RandomMovementComponent.h">
-      <Filter>Components</Filter>
-    </ClInclude>
     <ClInclude Include="SpriteComponent.h">
       <Filter>Components</Filter>
     </ClInclude>
@@ -199,12 +187,6 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="CameraManager.h">
-      <Filter>Managers</Filter>
-    </ClInclude>
-    <ClInclude Include="BulletComponent.h">
-      <Filter>Components</Filter>
-    </ClInclude>
-    <ClInclude Include="BulletPoolManager.h">
       <Filter>Managers</Filter>
     </ClInclude>
     <ClInclude Include="LevelManager.h">

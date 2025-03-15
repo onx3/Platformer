@@ -3,8 +3,8 @@
 #include "cassert"
 #include "imgui.h"
 
-SpriteComponent::SpriteComponent(GameObject * pOwner)
-    : GameComponent(pOwner)
+SpriteComponent::SpriteComponent(GameObject * pOwner, GameManager & gameManager)
+    : GameComponent(pOwner, gameManager)
     , mRotationSpeed(3.f)
     , mCurrentRotation(0.f)
     , mName("SpriteComponent")
@@ -127,10 +127,13 @@ void SpriteComponent::Update(float deltaTime)
 
 void SpriteComponent::draw(sf::RenderTarget & target, sf::RenderStates states)
 {
-    if (mpOwner->IsActive())
+    GameObject * pOwner = GetGameManager().GetGameObject(mOwnerHandle);
+    if (!pOwner || !pOwner->IsActive())
     {
-        target.draw(mSprite, states);
+        return;
     }
+
+    target.draw(mSprite, states);
 }
 
 //------------------------------------------------------------------------------------------------------------------------

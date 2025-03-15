@@ -9,8 +9,8 @@
 #include "LevelManager.h"
 #include "imgui.h"
 
-ControlledMovementComponent::ControlledMovementComponent(GameObject * pOwner)
-    : GameComponent(pOwner)
+ControlledMovementComponent::ControlledMovementComponent(GameObject * pOwner, GameManager & gameManager)
+    : GameComponent(pOwner, gameManager)
     , mVelocity(3.f, 3.f)
     , mAcceleration(800.f)
     , mDeceleration(1000.f)
@@ -24,8 +24,8 @@ ControlledMovementComponent::ControlledMovementComponent(GameObject * pOwner)
 
 //------------------------------------------------------------------------------------------------------------------------
 
-ControlledMovementComponent::ControlledMovementComponent(GameObject * pOwner, float veloX, float veloY)
-    : GameComponent(pOwner)
+ControlledMovementComponent::ControlledMovementComponent(GameObject * pOwner, GameManager & gameManager, float veloX, float veloY)
+    : GameComponent(pOwner, gameManager)
     , mVelocity(3.f, 3.f)
     , mAcceleration(800.f)
     , mDeceleration(1000.f)
@@ -46,7 +46,8 @@ ControlledMovementComponent::~ControlledMovementComponent()
 
 void ControlledMovementComponent::Update(float deltaTime)
 {
-    if (!mpOwner->IsActive())
+    GameObject * pOwner = GetGameManager().GetGameObject(mOwnerHandle);
+    if (!pOwner || !pOwner->IsActive())
     {
         return;
     }
