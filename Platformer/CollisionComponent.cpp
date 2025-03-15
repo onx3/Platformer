@@ -2,8 +2,8 @@
 #include "CollisionComponent.h"
 #include "box2d/box2d.h"
 
-CollisionComponent::CollisionComponent(GameObject * pOwner, b2World * pWorld, b2Body * pBody, sf::Vector2f size, bool isDynamic)
-    : GameComponent(pOwner)
+CollisionComponent::CollisionComponent(GameObject * pOwner, GameManager & gameManager, b2World * pWorld, b2Body * pBody, sf::Vector2f size, bool isDynamic)
+    : GameComponent(pOwner, gameManager)
     , mpWorld(pWorld)
     , mpBody(pBody)
     , mSize(size)
@@ -23,19 +23,22 @@ CollisionComponent::~CollisionComponent()
 
 void CollisionComponent::Update(float deltaTime)
 {
-    if (mpOwner->IsActive())
+    GameObject * pOwner = GetGameManager().GetGameObject(mOwnerHandle);
+    if (!pOwner || !pOwner->IsActive() || !mpBody)
     {
-        float scale = mpOwner->PIXELS_PER_METER;
-        auto spritePos = mpOwner->GetPosition();
-        b2Vec2 box2dPosition(spritePos.x / scale, spritePos.y / scale);
-        auto rotation = mpOwner->GetRotation() * (b2_pi / 180.0f);
+        return;
+    }
 
-        // Only update if there's a difference
-        if (box2dPosition != mpBody->GetPosition() || rotation != mpBody->GetAngle())
-        {
-            mpBody->SetTransform(box2dPosition, rotation);
-        }
-    }    
+    float scale = pOwner->PIXELS_PER_METER;
+    auto spritePos = pOwner->GetPosition();
+    b2Vec2 box2dPosition(spritePos.x / scale, spritePos.y / scale);
+    auto rotation = pOwner->GetRotation() * (b2_pi / 180.0f);
+
+    // Only update if there's a difference
+    if (box2dPosition != mpBody->GetPosition() || rotation != mpBody->GetAngle())
+    {
+        mpBody->SetTransform(box2dPosition, rotation);
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------

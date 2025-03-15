@@ -60,30 +60,41 @@ std::vector<sf::Sprite> & ScoreManager::GetSpriteLives()
 
     // Find the player GameObject and get its HealthComponent
     int lives = 0;
-	auto * pPlayerManager = GetGameManager().GetManager<PlayerManager>();
-	if (pPlayerManager->GetPlayers().empty())
-	{
-		return mSpriteLives;
-	}
-    auto * pPlayerObject = pPlayerManager->GetPlayers()[0];
-	if (pPlayerObject && !pPlayerObject->IsDestroyed())
-	{
-		auto pHealthComponent = pPlayerObject->GetComponent<HealthComponent>().lock();
-		if (pHealthComponent)
-		{
-			lives = pHealthComponent->GetLives(); // Fetch the player's current health
-		}
-	}	
+    auto * pPlayerManager = GetGameManager().GetManager<PlayerManager>();
+    if (!pPlayerManager)
+    {
+        return mSpriteLives;
+    }
 
-    // Generate life sprites based on the player's current lives
+    auto & players = pPlayerManager->GetPlayers();
+    if (players.empty())
+    {
+        return mSpriteLives;
+    }
+
+    BD::Handle playerHandle = players[0];
+    GameObject * pPlayerObject = GetGameManager().GetGameObject(playerHandle);
+    if (!pPlayerObject || pPlayerObject->IsDestroyed())
+    {
+        return mSpriteLives;
+    }
+
+    auto pHealthComponent = pPlayerObject->GetComponent<HealthComponent>().lock();
+    if (pHealthComponent)
+    {
+        lives = pHealthComponent->GetLives();
+    }
+
     for (int ii = 0; ii < lives; ++ii)
     {
-        mLifeSprite.setPosition(lifeStartPos.x + ii * 40, lifeStartPos.y);
-        mSpriteLives.push_back(mLifeSprite);
+        sf::Sprite lifeSprite = mLifeSprite;
+        lifeSprite.setPosition(lifeStartPos.x + ii * 40, lifeStartPos.y);
+        mSpriteLives.push_back(lifeSprite);
     }
 
     return mSpriteLives;
 }
+
 
 //------------------------------------------------------------------------------------------------------------------------
 

@@ -2,8 +2,8 @@
 #include "DropMovementComponent.h"
 #include "SpriteComponent.h"
 
-DropMovementComponent::DropMovementComponent(GameObject * pGameOwner)
-	: GameComponent(pGameOwner)
+DropMovementComponent::DropMovementComponent(GameObject * pGameOwner, GameManager & gameManager)
+	: GameComponent(pGameOwner, gameManager)
     , mVelocity(100.f)
     , mName("DropMovementComponent")
 {
@@ -30,27 +30,34 @@ DropMovementComponent::DropMovementComponent(GameObject * pGameOwner)
 
 void DropMovementComponent::Update(float deltaTime)
 {
-    if (mpOwner->IsActive())
+    GameObject * pOwner = GetGameManager().GetGameObject(mOwnerHandle);
+    if (!pOwner || !pOwner->IsActive())
     {
-        auto spriteComponent = GetGameObject().GetComponent<SpriteComponent>().lock();
-        if (spriteComponent)
-        {
-            // Move the object in the calculated direction
-            sf::Vector2f position = spriteComponent->GetPosition();
-            position += mDirection * mVelocity * deltaTime;
+        return;
+    }
 
-            spriteComponent->SetPosition(position);
+    auto spriteComponent = pOwner->GetComponent<SpriteComponent>().lock();
+    if (!spriteComponent)
+    {
+        return;
+    }
 
-            // Remove the object if it moves out of the screen
-            sf::Vector2u windowSize = GetGameObject().GetGameManager().GetWindow().getSize();
-            if (position.x + spriteComponent->GetWidth() < 0 ||
-                position.x > windowSize.x ||
-                position.y + spriteComponent->GetHeight() < 0 ||
-                position.y > windowSize.y)
-            {
-                mpOwner->Destroy();
-            }
-        }
+    auto & gameManager = pOwner->GetGameManager();
+    sf::Vector2u windowSize = gameManager.GetWindow().getSize();
+
+    // Move the object in the calculated direction
+    sf::Vector2f position = spriteComponent->GetPosition();
+    position += mDirection * mVelocity * deltaTime;
+
+    spriteComponent->SetPosition(position);
+
+    // Remove the object if it moves out of the screen
+    if (position.x + spriteComponent->GetWidth() < 0 ||
+        position.x > windowSize.x ||
+        position.y + spriteComponent->GetHeight() < 0 ||
+        position.y > windowSize.y)
+    {
+        pOwner->Destroy();
     }
 }
 

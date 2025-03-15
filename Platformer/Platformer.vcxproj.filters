@@ -79,9 +79,6 @@
     <ClCompile Include="ProjectileComponent.cpp">
       <Filter>Components</Filter>
     </ClCompile>
-    <ClCompile Include="RandomMovementComponent.cpp">
-      <Filter>Components</Filter>
-    </ClCompile>
     <ClCompile Include="SpriteComponent.cpp">
       <Filter>Components</Filter>
     </ClCompile>
@@ -109,17 +106,17 @@
     <ClCompile Include="CameraManager.cpp">
       <Filter>Managers</Filter>
     </ClCompile>
-    <ClCompile Include="BulletComponent.cpp">
-      <Filter>Components</Filter>
-    </ClCompile>
-    <ClCompile Include="BulletPoolManager.cpp">
-      <Filter>Managers</Filter>
-    </ClCompile>
     <ClCompile Include="LevelManager.cpp">
       <Filter>Managers</Filter>
     </ClCompile>
+    <ClCompile Include="FollowParentComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="TrackingComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
     <ClCompile Include="AIPathComponent.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Components</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -177,9 +174,6 @@
     <ClInclude Include="ProjectileComponent.h">
       <Filter>Components</Filter>
     </ClInclude>
-    <ClInclude Include="RandomMovementComponent.h">
-      <Filter>Components</Filter>
-    </ClInclude>
     <ClInclude Include="SpriteComponent.h">
       <Filter>Components</Filter>
     </ClInclude>
@@ -195,17 +189,20 @@
     <ClInclude Include="CameraManager.h">
       <Filter>Managers</Filter>
     </ClInclude>
-    <ClInclude Include="BulletComponent.h">
-      <Filter>Components</Filter>
-    </ClInclude>
-    <ClInclude Include="BulletPoolManager.h">
-      <Filter>Managers</Filter>
-    </ClInclude>
     <ClInclude Include="LevelManager.h">
       <Filter>Managers</Filter>
     </ClInclude>
     <ClInclude Include="AIPathComponent.h">
       <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="FollowParentComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="TrackingComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="TPool.h">
+      <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

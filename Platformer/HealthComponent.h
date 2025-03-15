@@ -5,7 +5,7 @@
 class HealthComponent : public GameComponent
 {
 public:
-	HealthComponent(GameObject * pOwner, int initialHealth, int maxHealth, int lifeCount, int maxLives, float hitCooldown = 0.f);
+	HealthComponent(GameObject * pOwner, GameManager & gameManager, int initialHealth, int maxHealth, int lifeCount, int maxLives, float hitCooldown = 0.f);
 
 	int GetHealth() const;
 	void AddHealth(int amount);

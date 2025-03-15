@@ -40,8 +40,6 @@ int main()
         bool waitingForRestart = true;
         while (windowManager.GetWindow()->isOpen() && waitingForRestart)
         {
-            //windowManager.PollEvents();
-
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter) || sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
             {
                 waitingForRestart = false;

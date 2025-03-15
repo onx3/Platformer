@@ -3,13 +3,13 @@
 #include "cassert"
 #include "imgui.h"
 
-SpriteComponent::SpriteComponent(GameObject * pOwner)
-    : GameComponent(pOwner)
+SpriteComponent::SpriteComponent(GameObject * pOwner, GameManager & gameManager)
+    : GameComponent(pOwner, gameManager)
     , mRotationSpeed(3.f)
     , mCurrentRotation(0.f)
-    , mFile()
     , mName("SpriteComponent")
 {
+    SetOriginToCenter();
 }
 
 //------------------------------------------------------------------------------------------------------------------------
@@ -22,7 +22,6 @@ SpriteComponent::~SpriteComponent()
 
 void SpriteComponent::SetSprite(std::shared_ptr<sf::Texture> pTexture, const sf::Vector2f & scale)
 {
-    
     if (pTexture)
     {
         mSprite.setTexture(*pTexture);
@@ -128,17 +127,20 @@ void SpriteComponent::Update(float deltaTime)
 
 void SpriteComponent::draw(sf::RenderTarget & target, sf::RenderStates states)
 {
-    if (mpOwner->IsActive())
+    GameObject * pOwner = GetGameManager().GetGameObject(mOwnerHandle);
+    if (!pOwner || !pOwner->IsActive())
     {
-        target.draw(mSprite, states);
+        return;
     }
+
+    target.draw(mSprite, states);
 }
 
 //------------------------------------------------------------------------------------------------------------------------
 
 void SpriteComponent::DebugImGuiComponentInfo()
 {
-    ImGui::Text("File Path: %s", mFile.c_str());
+    
 }
 
 //------------------------------------------------------------------------------------------------------------------------

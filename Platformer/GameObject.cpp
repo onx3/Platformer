@@ -7,24 +7,17 @@
 #include "GameComponent.h"
 #include "PlayerManager.h"
 
+//------------------------------------------------------------------------------------------------------------------------
 
-GameObject::GameObject(GameManager * pGameManager, ETeam team, GameObject * pParent)
+GameObject::GameObject(GameManager * pGameManager, ETeam team, BD::Handle handle, BD::Handle parentHandle)
     : mpGameManager(pGameManager)
     , mIsDestroyed(false)
     , mActive(true)
     , mTeam(team)
-    , mChildGameObjects()
-    , mpParent(pParent)
-    , mpPhysicsBody(nullptr)
+    , mChildHandles()
+    , mHandle(handle)
+    , mParentHandle(parentHandle)
 {
-    if (pParent)
-    {
-        pParent->AddChild(this);
-    }
-
-    auto spriteComp = std::make_shared<SpriteComponent>(this);
-    AddComponent(spriteComp);
-    spriteComp->SetOriginToCenter();
 }
 
 //------------------------------------------------------------------------------------------------------------------------
@@ -38,15 +31,16 @@ GameObject::~GameObject()
 
 void GameObject::CleanUpChildren()
 {
-    for (auto * pChild : mChildGameObjects)
+    for (auto childHandle : mChildHandles)
     {
+        auto * pChild = GetGameManager().GetGameObject(childHandle);
         if (pChild)
         {
             pChild->CleanUpChildren();
-            delete pChild;
+            GetGameManager().RemoveGameObject(childHandle);
         }
     }
-    mChildGameObjects.clear();
+    mChildHandles.clear();
 }
 
 //------------------------------------------------------------------------------------------------------------------------
@@ -54,8 +48,9 @@ void GameObject::CleanUpChildren()
 void GameObject::Destroy()
 {
     mIsDestroyed = true;
-    for (auto * pChild : mChildGameObjects)
+    for (auto childHandle : mChildHandles)
     {
+        auto * pChild = GetGameManager().GetGameObject(childHandle);
         if (pChild)
         {
             pChild->Destroy();
@@ -123,13 +118,15 @@ b2Body * GameObject::GetPhysicsBody() const
 
 void GameObject::NotifyParentOfDeletion()
 {
-    if (mpParent)
+    auto * pParent = GetGameManager().GetGameObject(mParentHandle);
+    if (pParent)
     {
-        auto & siblings = mpParent->GetChildren();
-        auto it = std::find(siblings.begin(), siblings.end(), this);
-        if (it != siblings.end())
+        std::vector<GameObject *> childObjs;
+        pParent->GetChildren(childObjs);
+        auto it = std::find(childObjs.begin(), childObjs.end(), this);
+        if (it != childObjs.end())
         {
-            siblings.erase(it);
+            childObjs.erase(it);
         }
     }
 }
@@ -148,8 +145,9 @@ void GameObject::Update(float deltaTime)
         }
 
         // Update child objects
-        for (auto * pChild : mChildGameObjects)
+        for (auto childHandle : mChildHandles)
         {
+            auto * pChild = GetGameManager().GetGameObject(childHandle);
             if (pChild && !pChild->IsDestroyed())
             {
                 pChild->Update(deltaTime);
@@ -244,42 +242,66 @@ void GameObject::AddChild(GameObject * pChild)
 {
     if (pChild)
     {
-        mChildGameObjects.push_back(pChild);
-        pChild->SetParent(this);
+        mChildHandles.push_back(pChild->GetHandle());
+        pChild->SetParent(GetHandle());
     }
 }
 
 //------------------------------------------------------------------------------------------------------------------------
 
-void GameObject::RemoveChild(GameObject * child)
+void GameObject::RemoveChild(GameObject * pChild)
 {
-    auto it = std::find(mChildGameObjects.begin(), mChildGameObjects.end(), child);
-    if (it != mChildGameObjects.end())
+    auto it = std::find(mChildHandles.begin(), mChildHandles.end(), pChild->GetHandle());
+    if (it != mChildHandles.end())
     {
-        (*it)->SetParent(nullptr);
-        mChildGameObjects.erase(it);
+        // Get the actual GameObject from the pool
+        GameObject * childObject = GetGameManager().GetGameObject(*it);
+        if (childObject)
+        {
+            childObject->SetParent(BD::Handle(0));
+        }
+
+        mChildHandles.erase(it);
     }
 }
 
 //------------------------------------------------------------------------------------------------------------------------
 
-std::vector<GameObject *> & GameObject::GetChildren()
+void GameObject::GetChildren(std::vector<GameObject *> & childObjs)
 {
-    return mChildGameObjects;
+    childObjs.reserve(mChildHandles.size());
+    for (auto childHandle : mChildHandles)
+    {
+        childObjs.push_back(GetGameManager().GetGameObject(childHandle));
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------------------
+
+std::vector<BD::Handle> & GameObject::GetChildrenHandles()
+{
+    return mChildHandles;
 }
 
 //------------------------------------------------------------------------------------------------------------------------
 
 GameObject * GameObject::GetParent() const
 {
-    return mpParent;
+    return GetGameManager().GetGameObject(mParentHandle);
 }
 
 //------------------------------------------------------------------------------------------------------------------------
 
-void GameObject::SetParent(GameObject * pParent)
+BD::Handle GameObject::GetParentHandle()
 {
-    mpParent = pParent;
+    return mParentHandle;
+}
+
+//------------------------------------------------------------------------------------------------------------------------
+
+void GameObject::SetParent(BD::Handle parentHandle)
+{
+    mParentHandle = parentHandle;
 }
 
 //------------------------------------------------------------------------------------------------------------------------
@@ -288,28 +310,32 @@ std::vector<GameComponent *> GameObject::GetAllComponents()
 {
     std::vector<GameComponent *> components;
 
-    // Validate 'this' pointer
     if (!this)
     {
         return components;
     }
 
-    // Validate mComponents
-    if (mComponents.empty() && mComponents.size() > 0) // Corruption check
+    if (mComponents.empty() && mComponents.size() > 0)
     {
         return components;
     }
 
-    // Safe iteration
     for (const auto & [type, component] : mComponents)
     {
-        if (component) // Ensure the shared_ptr is not null
+        if (component)
         {
             components.push_back(component.get());
         }
     }
 
     return components;
+}
+
+//------------------------------------------------------------------------------------------------------------------------
+
+BD::Handle GameObject::GetHandle() const
+{
+    return mHandle;
 }
 
 //------------------------------------------------------------------------------------------------------------------------
@@ -323,7 +349,19 @@ void GameObject::Activate()
 
 void GameObject::Deactivate()
 {
+    NotifyChildrenToDeactivate();
     mActive = false;
+}
+
+//------------------------------------------------------------------------------------------------------------------------
+
+void GameObject::NotifyChildrenToDeactivate()
+{
+    for (auto childHandle : mChildHandles)
+    {
+        auto pChildObj = GetGameManager().GetGameObject(childHandle);
+        pChildObj->Deactivate();
+    }
 }
 
 //------------------------------------------------------------------------------------------------------------------------
@@ -337,14 +375,17 @@ bool GameObject::IsActive()
 
 void GameObject::DebugImGuiInfo()
 {
+    GameManager & gameManager = GetGameManager();
 #if IMGUI_ENABLED()
-    // Show Game Object stuff
     for (auto & component : mComponents)
     {
-        auto * pPlayer = GetGameManager().GetManager<PlayerManager>()->GetPlayers()[0];
+        auto playerHandle = gameManager.GetManager<PlayerManager>()->GetPlayers()[0];
+        auto * pPlayer = gameManager.GetGameObject(playerHandle);
         if (this == pPlayer)
         {
-            ImGui::Text("Children count: %zu", pPlayer->GetChildren().size());
+            std::vector<GameObject *> childObjs;
+            pPlayer->GetChildren(childObjs);
+            ImGui::Text("Children count: %zu", childObjs.size());
         }
         // Update each component
         if (ImGui::CollapsingHeader(component.first.name()))
@@ -364,11 +405,12 @@ void GameObject::draw(sf::RenderTarget & target, sf::RenderStates states) const
         pComponent.second->draw(target, states);
     }
 
-    for (auto * child : mChildGameObjects)
+    for (auto childHandle : mChildHandles)
     {
-        if (child)
+        auto * pChild = GetGameManager().GetGameObject(childHandle);
+        if (pChild)
         {
-            target.draw(*child, states);
+            target.draw(*pChild, states);
         }
     }
 }

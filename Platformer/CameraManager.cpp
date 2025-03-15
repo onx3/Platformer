@@ -25,14 +25,15 @@ CameraManager::CameraManager(GameManager * pGameManager)
 
 void CameraManager::Update(float deltaTime)
 {
+	GameManager & gameManager = GetGameManager();
 	auto pPlayerManager = GetGameManager().GetManager<PlayerManager>();
-	auto & players = pPlayerManager->GetPlayers();
-	if (players.empty())
+	auto & playerHandles = pPlayerManager->GetPlayers();
+	if (playerHandles.empty())
 	{
 		return;
 	}
 
-	auto * pPlayer = players[0];
+	auto * pPlayer = gameManager.GetGameObject(playerHandles[0]);
 	if (!pPlayer)
 	{
 		return;
@@ -44,7 +45,6 @@ void CameraManager::Update(float deltaTime)
 
 	sf::Vector2f cameraDelta = mView.getCenter() - previousCenter;
 
-	auto & gameManager = GetGameManager();
 	gameManager.GetWindow().setView(mView);
 
 	sf::Vector2f cursorWorldPos = gameManager.GetWindow().mapPixelToCoords(
@@ -58,6 +58,8 @@ void CameraManager::Update(float deltaTime)
 
 void CameraManager::OnGameEnd()
 {
+	auto & window = GetGameManager().GetWindow();
+	window.setView(window.getDefaultView());
 }
 
 //------------------------------------------------------------------------------------------------------------------------

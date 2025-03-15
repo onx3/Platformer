@@ -13,7 +13,7 @@ enum class EProjectile
 class ProjectileComponent : public GameComponent
 {
 public:
-    ProjectileComponent(GameObject * pOwner);
+    ProjectileComponent(GameObject * pOwner, GameManager & gameManager);
     ~ProjectileComponent();
 
     std::string GetCorrectProjectileFile();
@@ -28,7 +28,7 @@ public:
 private:
     struct Projectile
     {
-        GameObject * pObject;
+        BD::Handle handle;
         float lifespan;
         int damage;
         sf::Vector2f direction;

@@ -5,7 +5,7 @@
 class SpriteComponent : public GameComponent
 {
 public:
-	SpriteComponent(GameObject * pOwner);
+	SpriteComponent(GameObject * pOwner, GameManager & gameManager);
 	~SpriteComponent();
 	
 	void SetSprite(std::shared_ptr<sf::Texture> pTexture, const sf::Vector2f & scale);
@@ -38,7 +38,6 @@ private:
 	sf::Sprite mSprite;
 	float mRotationSpeed;
 	float mCurrentRotation;
-	std::string mFile;
 	std::string mName;
 };
 

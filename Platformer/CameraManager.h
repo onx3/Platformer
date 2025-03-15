@@ -17,7 +17,6 @@ public:
 
 private:
 	sf::View mView;
-
 	sf::Sprite mCursorSprite;
 	sf::Vector2f mPreviousViewCenter;
 };

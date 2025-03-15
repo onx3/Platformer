@@ -13,8 +13,8 @@ enum class ESpriteTilt
 class ControlledMovementComponent : public GameComponent
 {
 public:
-	ControlledMovementComponent(GameObject * pOwner);
-	ControlledMovementComponent(GameObject * pOwner, float veloX, float veloY);
+	ControlledMovementComponent(GameObject * pOwner, GameManager & gameManager);
+	ControlledMovementComponent(GameObject * pOwner, GameManager & gameManager, float veloX, float veloY);
 
 	~ControlledMovementComponent();
 

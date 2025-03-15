@@ -7,14 +7,14 @@
 #include "SpriteComponent.h"
 #include "CollisionComponent.h"
 #include "HealthComponent.h"
-#include "RandomMovementComponent.h"
 #include "ExplosionComponent.h"
 #include "DropManager.h"
 #include "ResourceManager.h"
 #include "AIPathComponent.h"
+#include "FollowParentComponent.h"
+#include "TrackingComponent.h"
+#include "PlayerManager.h"
 
-
-Timer gTimers[3];
 EnemyAIManager::EnemyAIManager(GameManager * pGameManager)
 	: BaseManager(pGameManager)
 {
@@ -32,25 +32,30 @@ EnemyAIManager::~EnemyAIManager()
 
 void EnemyAIManager::Update(float deltaTime)
 {
-    for (auto * pEnemy : mEnemyObjects)
+    for (auto enemyHandle : mEnemyHandles)
     {
+        auto * pEnemy = GetGameManager().GetGameObject(enemyHandle);
         if (pEnemy && !pEnemy->IsDestroyed())
         {
             auto pHealthComp = pEnemy->GetComponent<HealthComponent>().lock();
             if (pHealthComp)
             {
-                pHealthComp->SetDeathCallBack([this, pEnemy]() {
-                    OnDeath(pEnemy);
+                pHealthComp->SetDeathCallBack([this, enemyHandle]() {
+                    GameObject * pEnemySafe = GetGameManager().GetGameObject(enemyHandle);
+                    if (pEnemySafe)
+                    {
+                        OnDeath(pEnemySafe);
+                    }
                     });
             }
         }
     }
 	CleanUpDeadEnemies();
 
-	while (mEnemyObjects.size() < mMaxEnemies)
+	while (mEnemyHandles.size() < mkMaxEnemies)
 	{
 		sf::Vector2f spawnPosition = sf::Vector2f(float(1183.723), float(851.008));
-		RespawnEnemy(EEnemy::Tank, spawnPosition);
+		RespawnEnemy(EEnemy::TankBody, spawnPosition);
 	}
 }
 
@@ -58,7 +63,7 @@ void EnemyAIManager::Update(float deltaTime)
 
 void EnemyAIManager::OnGameEnd()
 {
-    mEnemyObjects.clear();
+    mEnemyHandles.clear();
 }
 
 //------------------------------------------------------------------------------------------------------------------------
@@ -121,8 +126,9 @@ void EnemyAIManager::AddEnemies(int count, EEnemy type, sf::Vector2f pos)
     auto & gameManager = GetGameManager();
     for (int i = 0; i < count; ++i)
     {
-        auto * pEnemy = gameManager.CreateNewGameObject(ETeam::Enemy, gameManager.GetRootGameObject());
-        mEnemyObjects.push_back(pEnemy);
+        BD::Handle enemyHandle = gameManager.CreateNewGameObject(ETeam::Enemy, gameManager.GetRootGameObjectHandle());
+        auto * pEnemy = gameManager.GetGameObject(enemyHandle);
+        mEnemyHandles.push_back(enemyHandle);
 
         auto pSpriteComp = pEnemy->GetComponent<SpriteComponent>().lock();
 
@@ -131,28 +137,63 @@ void EnemyAIManager::AddEnemies(int count, EEnemy type, sf::Vector2f pos)
             {
                 SetUpSprite(*pSpriteComp, type);
                 pSpriteComp->SetPosition(pos);
-                pSpriteComp->SetOriginToCenter();
-                pEnemy->AddComponent(pSpriteComp);
             }
             {
                 // AI Path Movement
-                auto pAIPathComponentComp = std::make_shared<AIPathComponent>(pEnemy);
+                auto pAIPathComponentComp = std::make_shared<AIPathComponent>(pEnemy, gameManager);
                 pEnemy->AddComponent(pAIPathComponentComp);
 
                 // Health Component
-                auto pHealthComponent = std::make_shared<HealthComponent>(pEnemy, 10, 100, 1, 1);
+                auto pHealthComponent = std::make_shared<HealthComponent>(pEnemy, gameManager, 10, 100, 1, 1);
                 pEnemy->AddComponent(pHealthComponent);
             }
             {
                 pEnemy->CreatePhysicsBody(&gameManager.GetPhysicsWorld(), pEnemy->GetSize(), true);
                 auto pCollisionComp = std::make_shared<CollisionComponent>(
                     pEnemy,
+                    gameManager,
                     &gameManager.GetPhysicsWorld(),
                     pEnemy->GetPhysicsBody(),
                     pEnemy->GetSize(),
                     true
                 );
                 pEnemy->AddComponent(pCollisionComp);
+            }
+            {
+                // Tank Logic
+                BD::Handle gunHandle = gameManager.CreateNewGameObject(ETeam::Enemy, pEnemy->GetHandle());
+                auto * pGunGameObject = gameManager.GetGameObject(gunHandle);
+                auto pGunSpriteComp = pGunGameObject->GetComponent<SpriteComponent>().lock();
+                if (pGunSpriteComp)
+                {
+                    SetUpSprite(*pGunSpriteComp, EEnemy::TankGuns);
+                    pGunSpriteComp->SetPosition(pos);
+
+                    auto pFollowParentComponent = std::make_shared<FollowParentComponent>(pGunGameObject, gameManager);
+                    pGunGameObject->AddComponent(pFollowParentComponent);
+
+                    // Tracking Logic
+                    {
+                        auto * pPlayerManager = gameManager.GetManager<PlayerManager>();
+                        if (!pPlayerManager)
+                        {
+                            return;
+                        }
+                        auto & players = pPlayerManager->GetPlayers();
+                        if (players.empty())
+                        {
+                            return;
+                        }
+                        BD::Handle playerHandle = players[0];
+                        GameObject * pPlayerObject = gameManager.GetGameObject(playerHandle);
+                        if (!pPlayerObject)
+                        {
+                            return;
+                        }
+                        auto pTrackingComponent = std::make_shared<TrackingComponent>(pGunGameObject, gameManager, playerHandle);
+                        pGunGameObject->AddComponent(pTrackingComponent);
+                    }
+                }
             }
         }
     }
@@ -162,8 +203,9 @@ void EnemyAIManager::AddEnemies(int count, EEnemy type, sf::Vector2f pos)
 
 void EnemyAIManager::DestroyAllEnemies()
 {
-    for (auto * pEnemy : mEnemyObjects)
+    for (auto enemyHandle : mEnemyHandles)
     {
+        auto * pEnemy = GetGameManager().GetGameObject(enemyHandle);
         pEnemy->Destroy();
     }
 }
@@ -172,8 +214,11 @@ void EnemyAIManager::DestroyAllEnemies()
 
 void EnemyAIManager::CleanUpDeadEnemies()
 {
-    for (auto * pEnemy : mEnemyObjects)
+    auto & gameManager = GetGameManager();
+
+    for (BD::Handle enemyHandle : mEnemyHandles)
     {
+        GameObject * pEnemy = gameManager.GetGameObject(enemyHandle);
         if (pEnemy && !pEnemy->IsDestroyed())
         {
             auto explosionComp = pEnemy->GetComponent<ExplosionComponent>().lock();
@@ -182,14 +227,16 @@ void EnemyAIManager::CleanUpDeadEnemies()
                 pEnemy->Destroy();
             }
         }
-    }	
+    }
 
-    auto removeStart = std::remove_if(mEnemyObjects.begin(), mEnemyObjects.end(),
-        [](GameObject * pObj)
+    auto removeStart = std::remove_if(mEnemyHandles.begin(), mEnemyHandles.end(),
+        [&gameManager](BD::Handle handle)
         {
-            return pObj->IsDestroyed();
+            GameObject * pObj = gameManager.GetGameObject(handle);
+            return pObj == nullptr || pObj->IsDestroyed();
         });
-	mEnemyObjects.erase(removeStart, mEnemyObjects.end());
+
+    mEnemyHandles.erase(removeStart, mEnemyHandles.end());
 }
 
 //------------------------------------------------------------------------------------------------------------------------
@@ -198,21 +245,17 @@ std::string EnemyAIManager::GetEnemyFile(EEnemy type)
 {
 	switch (type)
 	{
-		case (EEnemy::Ship):
-		{
-			return "Art/EnemyShip.png";
-		}
-		case (EEnemy::Ufo):
-		{
-			return "Art/EnemyUFO.png";
-		}
-		case (EEnemy::Asteroid):
-		{
-			return "Art/Astroid.png";
-		}
-        case (EEnemy::Tank):
+        case (EEnemy::TankBody):
         {
             return "Art/Tanks/PNG/Hulls_Color_C/Hull_01.png";
+        }
+        case (EEnemy::TankGuns):
+        {
+            return "Art/Tanks/PNG/Weapon_Color_C/Gun_01.png";
+        }
+        case (EEnemy::TankTracks):
+        {
+            return "Art/Tanks/PNG/Tracks/Track_1_A.png";
         }
 		default:
 		{
@@ -223,9 +266,9 @@ std::string EnemyAIManager::GetEnemyFile(EEnemy type)
 
 //------------------------------------------------------------------------------------------------------------------------
 
-const std::vector<GameObject *> & EnemyAIManager::GetEnemies() const
+const std::vector<BD::Handle> & EnemyAIManager::GetEnemies() const
 {
-	return mEnemyObjects;
+	return mEnemyHandles;
 }
 
 //------------------------------------------------------------------------------------------------------------------------
@@ -237,7 +280,7 @@ void EnemyAIManager::OnDeath(GameObject * pEnemy)
     if (!pEnemy->GetComponent<ExplosionComponent>().lock())
     {
         auto explosionComp = std::make_shared<ExplosionComponent>(
-            pEnemy, "Art/explosion.png", 32, 32, 7, 0.1f, sf::Vector2f(2.f, 2.f), pEnemy->GetPosition());
+            pEnemy, gameManager, "Art/explosion.png", 32, 32, 7, 0.1f, sf::Vector2f(2.f, 2.f), pEnemy->GetPosition());
         pEnemy->AddComponent(explosionComp);
     }
     // Add Score
@@ -286,12 +329,17 @@ void EnemyAIManager::SetUpSprite(SpriteComponent & spriteComp, EEnemy type)
     auto scale = sf::Vector2f();
     switch (type)
     {
-        case (EEnemy::Asteroid):
+        case (EEnemy::TankBody):
         {
-            scale = sf::Vector2f(.08f, .08f);
+            scale = sf::Vector2f(.2f, .2f);
             break;
         }
-        case (EEnemy::Tank):
+        case (EEnemy::TankGuns):
+        {
+            scale = sf::Vector2f(.2f, .2f);
+            break;
+        }
+        case (EEnemy::TankTracks):
         {
             scale = sf::Vector2f(.2f, .2f);
             break;
