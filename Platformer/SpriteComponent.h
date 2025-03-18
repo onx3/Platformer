@@ -27,6 +27,8 @@ public:
 	float GetRotation() const;
 
 	void SetOriginToCenter();
+	sf::Vector2f GetOrigin();
+	void SetOrigin(sf::Vector2f newOrigin);
 
 	virtual void Update(float deltaTime) override;
 	virtual void draw(sf::RenderTarget & target, sf::RenderStates states) override;

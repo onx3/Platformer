@@ -154,7 +154,7 @@
     <ClCompile Include="DungeonManager.cpp" />
     <ClCompile Include="EnemyAIManager.cpp" />
     <ClCompile Include="ExplosionComponent.cpp" />
-    <ClCompile Include="FollowParentComponent.cpp" />
+    <ClCompile Include="FollowComponent.cpp" />
     <ClCompile Include="GameComponent.cpp" />
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="GameObject.cpp" />
@@ -189,7 +189,7 @@
     <ClInclude Include="DungeonManager.h" />
     <ClInclude Include="EnemyAIManager.h" />
     <ClInclude Include="ExplosionComponent.h" />
-    <ClInclude Include="FollowParentComponent.h" />
+    <ClInclude Include="FollowComponent.h" />
     <ClInclude Include="GameComponent.h" />
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="GameObject.h" />

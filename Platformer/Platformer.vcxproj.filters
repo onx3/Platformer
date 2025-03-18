@@ -109,7 +109,7 @@
     <ClCompile Include="LevelManager.cpp">
       <Filter>Managers</Filter>
     </ClCompile>
-    <ClCompile Include="FollowParentComponent.cpp">
+    <ClCompile Include="FollowComponent.cpp">
       <Filter>Components</Filter>
     </ClCompile>
     <ClCompile Include="TrackingComponent.cpp">
@@ -195,7 +195,7 @@
     <ClInclude Include="AIPathComponent.h">
       <Filter>Components</Filter>
     </ClInclude>
-    <ClInclude Include="FollowParentComponent.h">
+    <ClInclude Include="FollowComponent.h">
       <Filter>Components</Filter>
     </ClInclude>
     <ClInclude Include="TrackingComponent.h">

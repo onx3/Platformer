@@ -11,7 +11,7 @@
 #include "DropManager.h"
 #include "ResourceManager.h"
 #include "AIPathComponent.h"
-#include "FollowParentComponent.h"
+#include "FollowComponent.h"
 #include "TrackingComponent.h"
 #include "PlayerManager.h"
 
@@ -132,67 +132,74 @@ void EnemyAIManager::AddEnemies(int count, EEnemy type, sf::Vector2f pos)
 
         auto pSpriteComp = pEnemy->GetComponent<SpriteComponent>().lock();
 
-        if (pSpriteComp)
+        if (!pSpriteComp)
         {
-            {
-                SetUpSprite(*pSpriteComp, type);
-                pSpriteComp->SetPosition(pos);
-            }
-            {
-                // AI Path Movement
-                auto pAIPathComponentComp = std::make_shared<AIPathComponent>(pEnemy, gameManager);
-                pEnemy->AddComponent(pAIPathComponentComp);
+            return;
+        }
+        // Sprite Comp
+        SetUpSprite(*pSpriteComp, type);
+        pSpriteComp->SetPosition(pos);
 
-                // Health Component
-                auto pHealthComponent = std::make_shared<HealthComponent>(pEnemy, gameManager, 10, 100, 1, 1);
-                pEnemy->AddComponent(pHealthComponent);
-            }
+        // AI Path Movement
+        auto pAIPathComponentComp = std::make_shared<AIPathComponent>(pEnemy, gameManager);
+        pEnemy->AddComponent(pAIPathComponentComp);
+
+        // Health Component
+        auto pHealthComponent = std::make_shared<HealthComponent>(pEnemy, gameManager, 10, 100, 1, 1);
+        pEnemy->AddComponent(pHealthComponent);
+
+        // Physics and Collision
+        {
+            pEnemy->CreatePhysicsBody(&gameManager.GetPhysicsWorld(), pEnemy->GetSize(), true);
+            auto pCollisionComp = std::make_shared<CollisionComponent>(
+                pEnemy,
+                gameManager,
+                &gameManager.GetPhysicsWorld(),
+                pEnemy->GetPhysicsBody(),
+                pEnemy->GetSize(),
+                true
+            );
+            pEnemy->AddComponent(pCollisionComp);
+        }
+
+        // Extra Tank GameObject Logic
+        {
+            // Tank Logic
+            BD::Handle gunHandle = gameManager.CreateNewGameObject(ETeam::Enemy, pEnemy->GetHandle());
+            auto * pGunGameObject = gameManager.GetGameObject(gunHandle);
+            if (!pGunGameObject)
             {
-                pEnemy->CreatePhysicsBody(&gameManager.GetPhysicsWorld(), pEnemy->GetSize(), true);
-                auto pCollisionComp = std::make_shared<CollisionComponent>(
-                    pEnemy,
-                    gameManager,
-                    &gameManager.GetPhysicsWorld(),
-                    pEnemy->GetPhysicsBody(),
-                    pEnemy->GetSize(),
-                    true
-                );
-                pEnemy->AddComponent(pCollisionComp);
+                return;
             }
+            auto pGunSpriteComp = pGunGameObject->GetComponent<SpriteComponent>().lock();
+            if (pGunSpriteComp)
             {
-                // Tank Logic
-                BD::Handle gunHandle = gameManager.CreateNewGameObject(ETeam::Enemy, pEnemy->GetHandle());
-                auto * pGunGameObject = gameManager.GetGameObject(gunHandle);
-                auto pGunSpriteComp = pGunGameObject->GetComponent<SpriteComponent>().lock();
-                if (pGunSpriteComp)
+                SetUpSprite(*pGunSpriteComp, EEnemy::TankGuns);
+                pGunSpriteComp->SetPosition(pos);
+
+                auto * pPlayerManager = gameManager.GetManager<PlayerManager>();
+                if (!pPlayerManager)
                 {
-                    SetUpSprite(*pGunSpriteComp, EEnemy::TankGuns);
-                    pGunSpriteComp->SetPosition(pos);
+                    return;
+                }
+                auto & players = pPlayerManager->GetPlayers();
+                if (players.empty())
+                {
+                    return;
+                }
+                BD::Handle playerHandle = players[0];
+                GameObject * pPlayerObject = gameManager.GetGameObject(playerHandle);
+                if (!pPlayerObject)
+                {
+                    return;
+                }
 
-                    auto pFollowParentComponent = std::make_shared<FollowParentComponent>(pGunGameObject, gameManager);
+                // Setup Components
+                {
+                    auto pFollowParentComponent = std::make_shared<FollowComponent>(pGunGameObject, gameManager, enemyHandle);
                     pGunGameObject->AddComponent(pFollowParentComponent);
-
-                    // Tracking Logic
-                    {
-                        auto * pPlayerManager = gameManager.GetManager<PlayerManager>();
-                        if (!pPlayerManager)
-                        {
-                            return;
-                        }
-                        auto & players = pPlayerManager->GetPlayers();
-                        if (players.empty())
-                        {
-                            return;
-                        }
-                        BD::Handle playerHandle = players[0];
-                        GameObject * pPlayerObject = gameManager.GetGameObject(playerHandle);
-                        if (!pPlayerObject)
-                        {
-                            return;
-                        }
-                        auto pTrackingComponent = std::make_shared<TrackingComponent>(pGunGameObject, gameManager, playerHandle);
-                        pGunGameObject->AddComponent(pTrackingComponent);
-                    }
+                    auto pTrackingComponent = std::make_shared<TrackingComponent>(pGunGameObject, gameManager, playerHandle);
+                    pGunGameObject->AddComponent(pTrackingComponent);
                 }
             }
         }

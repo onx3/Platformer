@@ -1,34 +1,37 @@
 #include "AstroidsPrivate.h"
-#include "FollowParentComponent.h"
+#include "FollowComponent.h"
 
-FollowParentComponent::FollowParentComponent(GameObject * pOwner, GameManager & gameManager)
+FollowComponent::FollowComponent(GameObject * pOwner, GameManager & gameManager, BD::Handle followHandle, sf::Vector2f offset)
 	: GameComponent(pOwner, gameManager)
-	, mName("FollowParentComponent")
+	, mFollowHandle(followHandle)
+	, mOffset(offset)
+	, mName("FollowComponent")
 {
 
 }
 
 //------------------------------------------------------------------------------------------------------------------------
 
-FollowParentComponent::~FollowParentComponent()
+FollowComponent::~FollowComponent()
 {
 
 }
 
 //------------------------------------------------------------------------------------------------------------------------
 
-void FollowParentComponent::Update(float deltaTime)
+void FollowComponent::Update(float deltaTime)
 {
-	auto * pParent = GetGameObject().GetParent();
-	if (pParent)
+	auto * pFollowObj = GetGameManager().GetGameObject(mFollowHandle);
+	if (pFollowObj)
 	{
-		GetGameObject().SetPosition(pParent->GetPosition());
+		sf::Vector2f pos = pFollowObj->GetPosition() + mOffset;
+		GetGameObject().SetPosition(pos);
 	}
 }
 
 //------------------------------------------------------------------------------------------------------------------------
 
-std::string & FollowParentComponent::GetClassName()
+std::string & FollowComponent::GetClassName()
 {
 	return mName;
 }

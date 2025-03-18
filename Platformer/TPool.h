@@ -1,108 +1,115 @@
 #pragma once
 
 #include <bitset>
-#include <stack>
 #include <cassert>
+#include <cstdint>
+#include <limits>
+#include <intrin.h> // For _BitScanForward64
 
 namespace BD
 {
-	typedef unsigned long uint32;
-	typedef unsigned long long uint64;
-	typedef uint64 Handle;
+    typedef uint32_t uint32;
+    typedef uint64_t uint64;
+    typedef uint64 Handle;
 }
 
 template<class T, size_t MAX_SIZE = 1024>
 class TPool
 {
 public:
-	TPool()
-	{
-		for (BD::uint32 ii = 0; ii < MAX_SIZE; ++ii)
-		{
-			mFreeIndices.push(ii);
-		}
-	}
+    TPool()
+    {
+        memset(mOccupancyChunks, 0, sizeof(mOccupancyChunks));
+    }
 
-	//------------------------------------------------------------------------------------------------------------------------
+    BD::Handle AddObject(T * obj)
+    {
+        BD::uint32 index = FindFirstFreeIndex();
+        if (index == MAX_SIZE)
+        {
+            assert(false && "Overflow object pool");
+        }
 
-	BD::Handle AddObject(T * obj)
-	{
-		if (mFreeIndices.empty())
-		{
-			throw std::runtime_error("Pool is full!");
-		}
+        mStorage[index] = obj;
+        mIsOccupied.set(index);
+        mOccupancyChunks[index / 64] |= (1ULL << (index % 64)); // Set bit in chunk
+        ++mVersions[index];
 
-		BD::uint32 index = mFreeIndices.top();
-		mFreeIndices.pop();
+        return PackHandle(index, mVersions[index]);
+    }
 
-		mStorage[index] = obj;
-		mIsOccupied.set(index);
-		++mVersions[index];
+    T * Get(BD::Handle handle)
+    {
+        BD::uint32 index = ExtractIndex(handle);
+        BD::uint32 version = ExtractVersion(handle);
 
-		return PackHandle(index, mVersions[index]);
-	}
+        if (index >= MAX_SIZE || !mIsOccupied.test(index) || mVersions[index] != version || !mStorage[index])
+        {
+            return nullptr;
+        }
 
-	//------------------------------------------------------------------------------------------------------------------------
+        return mStorage[index];
+    }
 
-	T * Get(BD::Handle handle)
-	{
-		BD::uint32 index = ExtractIndex(handle);
-		BD::uint32 version = ExtractVersion(handle);
+    void Remove(BD::Handle handle)
+    {
+        BD::uint32 index = ExtractIndex(handle);
+        BD::uint32 version = ExtractVersion(handle);
 
-		if (index >= MAX_SIZE || !mIsOccupied.test(index) || mVersions[index] != version || !mStorage[index])
-		{
-			return nullptr;
-		}
+        if (index >= MAX_SIZE || !mIsOccupied.test(index) || mVersions[index] != version)
+        {
+            return;
+        }
 
-		return mStorage[index];
-	}
-
-	//------------------------------------------------------------------------------------------------------------------------
-
-	void Remove(BD::Handle handle)
-	{
-		BD::uint32 index = ExtractIndex(handle);
-		BD::uint32 version = ExtractVersion(handle);
-
-		if (index >= MAX_SIZE || !mIsOccupied.test(index) || mVersions[index] != version)
-		{
-			return;
-		}
-
-		delete mStorage[index];
-		mStorage[index] = nullptr;
-		mIsOccupied.reset(index);
-		++mVersions[index];
-		mFreeIndices.push(index);
-	}
-
-	//------------------------------------------------------------------------------------------------------------------------
+        delete mStorage[index];
+        mStorage[index] = nullptr;
+        mIsOccupied.reset(index);
+        mOccupancyChunks[index / 64] &= ~(1ULL << (index % 64)); // Clear bit in chunk
+        ++mVersions[index];
+    }
 
 private:
+    inline BD::Handle PackHandle(uint32 index, uint32 version)
+    {
+        return (static_cast<BD::Handle>(version) << 32) | index;
+    }
 
-	inline BD::Handle PackHandle(uint32 index, uint32 version)
-	{
-		return (static_cast<BD::Handle>(version) << 32) | index;
-	}
+    inline uint32 ExtractIndex(BD::Handle handle)
+    {
+        return static_cast<uint32>(handle & 0xFFFFFFFF);
+    }
 
-	//------------------------------------------------------------------------------------------------------------------------
+    inline uint32 ExtractVersion(BD::Handle handle)
+    {
+        return static_cast<uint32>((handle >> 32) & 0xFFFFFFFF);
+    }
 
-	inline uint32 ExtractIndex(BD::Handle handle)
-	{
-		return static_cast<uint32>(handle & 0xFFFFFFFF);
-	}
+    BD::uint32 FindFirstFreeIndex()
+    {
+        for (BD::uint32 chunkIdx = 0; chunkIdx < MAX_SIZE / 64; ++chunkIdx)
+        {
+            if (mOccupancyChunks[chunkIdx] != std::numeric_limits<uint64>::max()) // Not the max
+            {
+                BD::uint32 bitIdx = FindFirstClearBit(mOccupancyChunks[chunkIdx]);
+                return (chunkIdx * 64) + bitIdx;
+            }
+        }
+        return MAX_SIZE; // No free slot found
+    }
 
-	//------------------------------------------------------------------------------------------------------------------------
+    BD::uint32 FindFirstClearBit(BD::uint64 chunk)
+    {
+        unsigned long index;
+        if (_BitScanForward64(&index, ~chunk)) // Finds first clear bit
+        {
+            return static_cast<uint32>(index);
+        }
+        return 64; // No free bits
+    }
 
-	inline uint32 ExtractVersion(BD::Handle handle)
-	{
-		return static_cast<uint32>((handle >> 32) & 0xFFFFFFFF);
-	}
+    T * mStorage[MAX_SIZE] = { nullptr };
+    std::bitset<MAX_SIZE> mIsOccupied;
+    BD::uint32 mVersions[MAX_SIZE] = { 0 };
 
-	//------------------------------------------------------------------------------------------------------------------------
-
-	T * mStorage[MAX_SIZE] = { nullptr }; // Stores pointers to objects
-	std::bitset<MAX_SIZE> mIsOccupied; // Tracks which slots are in use
-	BD::uint32 mVersions[MAX_SIZE] = { 0 }; // Stores version numbers for handles
-	std::stack<BD::uint32> mFreeIndices; // Stores available indices for allocation
+    BD::uint64 mOccupancyChunks[MAX_SIZE / 64] = {};
 };

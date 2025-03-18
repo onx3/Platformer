@@ -22,32 +22,27 @@ void TrackingComponent::Update(float deltaTime)
 {
     GameManager & gameManager = GetGameManager();
 
-    // Get the owner and tracked object
-    GameObject * pOwner = gameManager.GetGameObject(mOwnerHandle);
+    GameObject * pGameObject = gameManager.GetGameObject(mOwnerHandle);
     GameObject * pTrackedGameObject = gameManager.GetGameObject(mTracker);
 
-    if (!pOwner || !pTrackedGameObject)
+    if (!pGameObject || !pTrackedGameObject)
     {
         return;
     }
 
-    // Get positions
-    sf::Vector2f ownerPosition = pOwner->GetPosition();
+    sf::Vector2f ownerPosition = pGameObject->GetPosition();
     sf::Vector2f trackedPosition = pTrackedGameObject->GetPosition();
 
-    // Calculate direction vector
     sf::Vector2f direction = trackedPosition - ownerPosition;
     float length = std::sqrt(direction.x * direction.x + direction.y * direction.y);
     if (length != 0)
     {
-        direction /= length; // Normalize direction
+        direction /= length;
     }
 
-    // Calculate angle in degrees
     float angleDegrees = std::atan2(direction.y, direction.x) * (180.f / 3.14159265f);
 
-    // Apply rotation (adjusted to match sprite alignment)
-    pOwner->SetRotation(angleDegrees + 90.f);
+    pGameObject->SetRotation(angleDegrees + 90.f);
 }
 
 //------------------------------------------------------------------------------------------------------------------------

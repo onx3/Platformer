@@ -3,12 +3,16 @@
 #include <string>
 #include <functional>
 
+//------------------------------------------------------------------------------------------------------------------------
+// ResourceId
+//------------------------------------------------------------------------------------------------------------------------
+
 class ResourceId
 {
 public:
     explicit ResourceId(std::string const & name);        
 
-    size_t GetHash();
+    size_t GetHash() const;
 
     std::string & GetName();
 
@@ -24,8 +28,23 @@ public:
 private:
     std::string mResourceName;
     size_t mHash;
-    // Cache the hash value
 };
+
+//------------------------------------------------------------------------------------------------------------------------
+// Hashing
+//------------------------------------------------------------------------------------------------------------------------
+
+namespace std
+{
+    template<>
+    struct hash<ResourceId>
+    {
+        size_t operator() (const ResourceId & resourceId) const noexcept
+        {
+            return resourceId.GetHash();
+        }
+    };
+}
 
 //------------------------------------------------------------------------------------------------------------------------
 // ResourceManager
@@ -43,5 +62,5 @@ public:
     void PreloadResources(std::vector<ResourceId> & resourceIds);
     
 private:
-    std::map<ResourceId, std::shared_ptr<sf::Texture>> mTextureResources;
+    std::unordered_map<ResourceId, std::shared_ptr<sf::Texture>> mTextureResources;
 };

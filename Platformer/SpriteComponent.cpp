@@ -119,6 +119,20 @@ void SpriteComponent::SetOriginToCenter()
 
 //------------------------------------------------------------------------------------------------------------------------
 
+sf::Vector2f SpriteComponent::GetOrigin()
+{
+    return mSprite.getOrigin();
+}
+
+//------------------------------------------------------------------------------------------------------------------------
+
+void SpriteComponent::SetOrigin(sf::Vector2f newOrigin)
+{
+    mSprite.setOrigin(newOrigin);
+}
+
+//------------------------------------------------------------------------------------------------------------------------
+
 void SpriteComponent::Update(float deltaTime)
 {
 }

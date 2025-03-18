@@ -1,15 +1,17 @@
 #include "AstroidsPrivate.h"
 #include "ResourceManager.h"
 
+//------------------------------------------------------------------------------------------------------------------------
+
 ResourceId::ResourceId(std::string const & name)
     : mResourceName(name)
-    , mHash(static_cast<uint32_t>(std::hash<std::string>{}(name)))
+    , mHash(static_cast<BD::uint32>(std::hash<std::string>{}(name)))
 {
 }
 
 //------------------------------------------------------------------------------------------------------------------------
 
-size_t ResourceId::GetHash()
+size_t ResourceId::GetHash() const
 {
     return mHash;
 }
