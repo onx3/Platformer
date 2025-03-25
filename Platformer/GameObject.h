@@ -71,7 +71,8 @@ public:
     sf::Vector2f GetPosition() const;
     void SetPosition(const sf::Vector2f & position);
 
-    float GetRotation() const;
+    float GetRotationDegrees() const;
+    float GetRotationRadians() const;
     void SetRotation(float angle);
     sf::Vector2f GetSize() const;
 

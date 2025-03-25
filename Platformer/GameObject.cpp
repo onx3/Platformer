@@ -195,12 +195,24 @@ void GameObject::SetPosition(const sf::Vector2f & position)
 
 //------------------------------------------------------------------------------------------------------------------------
 
-float GameObject::GetRotation() const
+float GameObject::GetRotationDegrees() const
 {
     auto pGameObjectSprite = GetComponent<SpriteComponent>().lock();
     if (pGameObjectSprite)
     {
         return pGameObjectSprite->GetRotation();
+    }
+    return 0.0f;
+}
+
+//------------------------------------------------------------------------------------------------------------------------
+
+float GameObject::GetRotationRadians() const
+{
+    auto pGameObjectSprite = GetComponent<SpriteComponent>().lock();
+    if (pGameObjectSprite)
+    {
+        return pGameObjectSprite->GetRotation() * (3.14159265f / 180.f);
     }
     return 0.0f;
 }

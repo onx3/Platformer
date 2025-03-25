@@ -123,6 +123,10 @@ void GameManager::EndGame()
     if (mRootHandle != BD::Handle(0))
     {
         CleanUpDestroyedGameObjects(mRootHandle);
+        if (auto * pRootObj = GetGameObject(mRootHandle))
+        {
+            delete pRootObj;
+        }
         mPool.Remove(mRootHandle);
         mRootHandle = BD::Handle(0);
     }
@@ -241,6 +245,11 @@ void GameManager::CleanUpDestroyedGameObjects(BD::Handle rootHandle)
     // Delete all objects marked for deletion
     for (BD::Handle handle : objectsToDelete)
     {
+        GameObject * pObject = GetGameObject(handle);
+        if (pObject)
+        {
+            delete pObject;
+        }
         mPool.Remove(handle);
     }
 }

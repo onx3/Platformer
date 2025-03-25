@@ -7,6 +7,8 @@ int main()
     WindowManager windowManager;
     bool paused = false;
     sf::Clock clock;
+    float fpsTimer = 0.f;
+    int frameCount = 0;
 
     while (windowManager.GetWindow()->isOpen())
     {
@@ -23,6 +25,16 @@ int main()
             }
 
             float deltaTime = clock.restart().asSeconds();
+
+            frameCount++;
+            fpsTimer += deltaTime;
+
+            if (fpsTimer >= 1.f) // Once every second
+            {
+                std::cout << "FPS: " << frameCount << std::endl;
+                fpsTimer = 0.f;
+                frameCount = 0;
+            }
             if (!paused)
             {
                 pGameManager->Update(deltaTime);

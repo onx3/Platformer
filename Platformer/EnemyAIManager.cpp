@@ -14,6 +14,13 @@
 #include "FollowComponent.h"
 #include "TrackingComponent.h"
 #include "PlayerManager.h"
+#include "EnemyBulletComponent.h"
+
+namespace
+{
+    int skBossHealth = 10000;
+    int skMaxBossHealth = 10000;
+}
 
 EnemyAIManager::EnemyAIManager(GameManager * pGameManager)
 	: BaseManager(pGameManager)
@@ -145,7 +152,7 @@ void EnemyAIManager::AddEnemies(int count, EEnemy type, sf::Vector2f pos)
         pEnemy->AddComponent(pAIPathComponentComp);
 
         // Health Component
-        auto pHealthComponent = std::make_shared<HealthComponent>(pEnemy, gameManager, 10, 100, 1, 1);
+        auto pHealthComponent = std::make_shared<HealthComponent>(pEnemy, gameManager, skBossHealth, skMaxBossHealth, 1, 1);
         pEnemy->AddComponent(pHealthComponent);
 
         // Physics and Collision
@@ -200,6 +207,8 @@ void EnemyAIManager::AddEnemies(int count, EEnemy type, sf::Vector2f pos)
                     pGunGameObject->AddComponent(pFollowParentComponent);
                     auto pTrackingComponent = std::make_shared<TrackingComponent>(pGunGameObject, gameManager, playerHandle);
                     pGunGameObject->AddComponent(pTrackingComponent);
+                    auto pEnemyBulletComponent = std::make_shared<EnemyBulletComponent>(pGunGameObject, gameManager);
+                    pGunGameObject->AddComponent(pEnemyBulletComponent);
                 }
             }
         }

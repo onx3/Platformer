@@ -32,7 +32,7 @@ void CollisionComponent::Update(float deltaTime)
     float scale = pOwner->PIXELS_PER_METER;
     auto spritePos = pOwner->GetPosition();
     b2Vec2 box2dPosition(spritePos.x / scale, spritePos.y / scale);
-    auto rotation = pOwner->GetRotation() * (b2_pi / 180.0f);
+    auto rotation = pOwner->GetRotationDegrees() * (b2_pi / 180.0f);
 
     // Only update if there's a difference
     if (box2dPosition != mpBody->GetPosition() || rotation != mpBody->GetAngle())

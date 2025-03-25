@@ -153,6 +153,7 @@
     <ClCompile Include="DropMovementComponent.cpp" />
     <ClCompile Include="DungeonManager.cpp" />
     <ClCompile Include="EnemyAIManager.cpp" />
+    <ClCompile Include="EnemyBulletComponent.cpp" />
     <ClCompile Include="ExplosionComponent.cpp" />
     <ClCompile Include="FollowComponent.cpp" />
     <ClCompile Include="GameComponent.cpp" />
@@ -188,6 +189,7 @@
     <ClInclude Include="DropMovementComponent.h" />
     <ClInclude Include="DungeonManager.h" />
     <ClInclude Include="EnemyAIManager.h" />
+    <ClInclude Include="EnemyBulletComponent.h" />
     <ClInclude Include="ExplosionComponent.h" />
     <ClInclude Include="FollowComponent.h" />
     <ClInclude Include="GameComponent.h" />
@@ -203,6 +205,7 @@
     <ClInclude Include="Timer.h" />
     <ClInclude Include="TPool.h" />
     <ClInclude Include="TrackingComponent.h" />
+    <ClInclude Include="TReusePool.h" />
     <ClInclude Include="WindowManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

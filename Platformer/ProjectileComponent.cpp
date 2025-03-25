@@ -19,7 +19,7 @@ ProjectileComponent::ProjectileComponent(GameObject * pOwner, GameManager & game
 	, mSpeed(700.f)
 	, mCooldown(.2f)
 	, mTimeSinceLastShot(1.f)
-	, mLastUsedProjectile(EProjectile::GreenLaser)
+	, mLastUsedProjectile(EProjectileType::GreenLaser)
 	, mName("ProjectileComponent")
 {
 
@@ -35,15 +35,18 @@ ProjectileComponent::~ProjectileComponent()
 
 std::string ProjectileComponent::GetCorrectProjectileFile()
 {
-	if (mLastUsedProjectile == EProjectile::GreenLaser)
+	switch (mLastUsedProjectile)
 	{
-		mLastUsedProjectile = EProjectile::RedLaser;
-		return "Art/laserRed.png";
-	}
-	else
-	{
-		mLastUsedProjectile = EProjectile::GreenLaser;
-		return "Art/laserGreen.png";
+		case (EProjectileType::GreenLaser):
+		{
+			mLastUsedProjectile = EProjectileType::RedLaser;
+			return "Art/laserRed.png";
+		}
+		default:
+		{
+			mLastUsedProjectile = EProjectileType::GreenLaser;
+			return "Art/laserGreen.png";
+		}
 	}
 }
 
@@ -76,7 +79,7 @@ void ProjectileComponent::Shoot()
 
 		// Calculate edge offset
 		sf::Vector2f offset;
-		if (mLastUsedProjectile == EProjectile::RedLaser)
+		if (mLastUsedProjectile == EProjectileType::RedLaser)
 		{
 			offset = sf::Vector2f(playerSize.y / 2.f, 0);
 		}
@@ -131,22 +134,11 @@ void ProjectileComponent::Update(float deltaTime)
 
 	if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && mTimeSinceLastShot >= mCooldown)
 	{
-		float rotationInDegrees = pOwner->GetRotation();
-		float rotationInRadians = rotationInDegrees * (3.14159f / 180.0f);
-
-		sf::Vector2f direction(std::sin(rotationInRadians), -std::cos(rotationInRadians));
 		Shoot();
 		mTimeSinceLastShot = 0.0f;
 	}
 
 	UpdateProjectiles(deltaTime);
-}
-
-//------------------------------------------------------------------------------------------------------------------------
-
-void ProjectileComponent::draw(sf::RenderTarget & target, sf::RenderStates states)
-{
-	
 }
 
 //------------------------------------------------------------------------------------------------------------------------

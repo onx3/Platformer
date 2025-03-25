@@ -1,28 +1,12 @@
 #pragma once
 #include "GameComponent.h"
-#include <SFML/System/Vector2.hpp>
-#include <vector>
-#include <string>
+#include "ProjectileComponent.h"
 
-struct Projectile
-{
-    BD::Handle handle;
-    float lifespan;
-    int damage;
-    sf::Vector2f direction;
-};
-
-enum class EProjectileType
-{
-    RedLaser,
-    GreenLaser
-};
-
-class ProjectileComponent : public GameComponent
+class EnemyBulletComponent : public GameComponent
 {
 public:
-    ProjectileComponent(GameObject * pOwner, GameManager & gameManager);
-    ~ProjectileComponent();
+    EnemyBulletComponent(GameObject * pOwner, GameManager & gameManager);
+    ~EnemyBulletComponent();
 
     std::string GetCorrectProjectileFile();
 
@@ -35,10 +19,11 @@ public:
 private:
     void UpdateProjectiles(float deltaTime);
 
-    std::vector<Projectile> mProjectiles;
+    std::vector<Projectile> mBullets;
     float mSpeed;
     float mCooldown;
     float mTimeSinceLastShot;
     EProjectileType mLastUsedProjectile;
     std::string mName;
 };
+

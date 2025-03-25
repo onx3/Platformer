@@ -26,7 +26,7 @@ void CollisionListener::BeginContact(b2Contact * contact)
 
 void CollisionListener::HandleCollision(GameObject * pObjA, GameObject * pObjB)
 {
-    // Player hit enemy
+    // Enemy hit player
     if (pObjA->GetTeam() == ETeam::Player && pObjB->GetTeam() == ETeam::Enemy)
     {
         auto pHealthComp = pObjA->GetComponent<HealthComponent>().lock();

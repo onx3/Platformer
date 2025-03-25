@@ -21,11 +21,11 @@ PlayerManager::PlayerManager(GameManager * pGameManager)
 
     // Sound
     {
-        assert(mLoseLifeSoundBuffer.loadFromFile("Audio/LoseLifeSound.wav"));
+        mLoseLifeSoundBuffer.loadFromFile("Audio/LoseLifeSound.wav");
         mLoseLifeSound.setBuffer(mLoseLifeSoundBuffer);
         mLoseLifeSound.setVolume(100.f);
         
-        assert(mDeathSoundBuffer.loadFromFile("Audio/Death.flac"));
+        mDeathSoundBuffer.loadFromFile("Audio/Death.flac");
         mDeathSound.setBuffer(mDeathSoundBuffer);
         mDeathSound.setVolume(50.f);
     }

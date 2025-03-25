@@ -8,8 +8,8 @@
 
 namespace BD
 {
-    typedef uint32_t uint32;
-    typedef uint64_t uint64;
+    typedef unsigned long uint32;
+    typedef unsigned long long uint64;
     typedef uint64 Handle;
 }
 
@@ -61,7 +61,6 @@ public:
             return;
         }
 
-        delete mStorage[index];
         mStorage[index] = nullptr;
         mIsOccupied.reset(index);
         mOccupancyChunks[index / 64] &= ~(1ULL << (index % 64)); // Clear bit in chunk
@@ -110,6 +109,5 @@ private:
     T * mStorage[MAX_SIZE] = { nullptr };
     std::bitset<MAX_SIZE> mIsOccupied;
     BD::uint32 mVersions[MAX_SIZE] = { 0 };
-
     BD::uint64 mOccupancyChunks[MAX_SIZE / 64] = {};
 };
