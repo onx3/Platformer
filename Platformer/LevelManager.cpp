@@ -60,22 +60,28 @@ void LevelManager::Render(sf::RenderWindow & window)
 
 bool LevelManager::IsTileWalkableAI(int x, int y) const
 {
+#if 0
     if (y < 0 || y >= mHeight || x < 0 || x >= mWidth)
         return false;
 
     int tile = mTileData[y][x];
     return (tile == 70);
+#endif
+    return true;
 }
 
 //------------------------------------------------------------------------------------------------------------------------
 
 bool LevelManager::IsTileWalkablePlayer(int x, int y) const
 {
+#if 0
     if (y < 0 || y >= mHeight || x < 0 || x >= mWidth)
         return false;
 
     int tile = mTileData[y][x];
     return (tile == 7 || tile == 70);
+#endif
+    return true;
 }
 
 //------------------------------------------------------------------------------------------------------------------------
@@ -94,7 +100,7 @@ void LevelManager::ParseTileData(const json & levelData)
     mTileData.clear();
 
     ResourceManager * resourceManager = GetGameManager().GetManager<ResourceManager>();
-    auto resourceID = ResourceId("Art/Dungeon_Tileset.png");
+    auto resourceID = ResourceId("Art/TileSet.png");
     auto tilesetTexture = resourceManager->GetTexture(resourceID);
     if (!tilesetTexture)
     {

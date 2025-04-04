@@ -12,9 +12,8 @@ namespace
 
 enum class EEnemy
 {
-	TankBody,
-	TankGuns,
-	TankTracks
+	LizardF,
+	Ogre
 };
 
 class EnemyAIManager : public BaseManager

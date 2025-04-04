@@ -18,8 +18,8 @@
 
 namespace
 {
-    int skBossHealth = 10000;
-    int skMaxBossHealth = 10000;
+    int skBossHealth = 100;
+    int skMaxBossHealth = 100;
 }
 
 EnemyAIManager::EnemyAIManager(GameManager * pGameManager)
@@ -62,7 +62,7 @@ void EnemyAIManager::Update(float deltaTime)
 	while (mEnemyHandles.size() < mkMaxEnemies)
 	{
 		sf::Vector2f spawnPosition = sf::Vector2f(float(1183.723), float(851.008));
-		RespawnEnemy(EEnemy::TankBody, spawnPosition);
+		RespawnEnemy(EEnemy::Ogre, spawnPosition);
 	}
 }
 
@@ -169,6 +169,7 @@ void EnemyAIManager::AddEnemies(int count, EEnemy type, sf::Vector2f pos)
             pEnemy->AddComponent(pCollisionComp);
         }
 
+#if 0
         // Extra Tank GameObject Logic
         {
             // Tank Logic
@@ -212,6 +213,7 @@ void EnemyAIManager::AddEnemies(int count, EEnemy type, sf::Vector2f pos)
                 }
             }
         }
+#endif
     }
 }
 
@@ -261,21 +263,17 @@ std::string EnemyAIManager::GetEnemyFile(EEnemy type)
 {
 	switch (type)
 	{
-        case (EEnemy::TankBody):
+        case (EEnemy::LizardF):
         {
-            return "Art/Tanks/PNG/Hulls_Color_C/Hull_01.png";
+            return "Art/Enemies/LizardF/lizard_f_idle_anim_f0.png";
         }
-        case (EEnemy::TankGuns):
+        case (EEnemy::Ogre):
         {
-            return "Art/Tanks/PNG/Weapon_Color_C/Gun_01.png";
-        }
-        case (EEnemy::TankTracks):
-        {
-            return "Art/Tanks/PNG/Tracks/Track_1_A.png";
+            return "Art/Enemies/Ogre/ogre_idle_anim_f0.png";
         }
 		default:
 		{
-			return "Art/Astroid.png";
+			return "Art/Enemies/Ogre/ogre_idle_anim_f0.png";
 		}
 	}
 }
@@ -345,24 +343,19 @@ void EnemyAIManager::SetUpSprite(SpriteComponent & spriteComp, EEnemy type)
     auto scale = sf::Vector2f();
     switch (type)
     {
-        case (EEnemy::TankBody):
+        case (EEnemy::LizardF):
         {
             scale = sf::Vector2f(.2f, .2f);
             break;
         }
-        case (EEnemy::TankGuns):
+        case (EEnemy::Ogre):
         {
-            scale = sf::Vector2f(.2f, .2f);
-            break;
-        }
-        case (EEnemy::TankTracks):
-        {
-            scale = sf::Vector2f(.2f, .2f);
+            scale = sf::Vector2f(1.2f, 1.2f);
             break;
         }
         default :
         {
-            scale = sf::Vector2f(1.f, 1.f);
+            scale = sf::Vector2f(.2f, .2f);
             break;
         }
     }
